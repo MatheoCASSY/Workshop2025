@@ -54,7 +54,8 @@ def draw_icon_on_image(x_offset, y_offset, icon, invert=False):
 
 def run_script_capture(path):
     try:
-        proc = subprocess.run(["python3", path], capture_output=True, text=True, timeout=30)
+        venv_python = "/home/pi/projet/scripts/venv/bin/python"
+        proc = subprocess.run([venv_python, path], capture_output=True, text=True, timeout=30)
         out = proc.stdout or ""
         err = proc.stderr or ""
         text = out + (("\nERR:\n" + err) if err else "")
@@ -62,6 +63,7 @@ def run_script_capture(path):
         text = "Script timeout."
     except Exception as e:
         text = "Error running script: " + str(e)
+
     lines = []
     for line in text.splitlines():
         max_chars = 20
