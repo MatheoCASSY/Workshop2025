@@ -55,7 +55,7 @@ def draw_icon_on_image(x_offset, y_offset, icon, invert=False):
 def run_script_capture(path):
     try:
         venv_python = "/home/pi/projet/scripts/venv/bin/python"
-        proc = subprocess.run([venv_python, path], capture_output=True, text=True, timeout=30)
+        proc = subprocess.run(["python3", path], capture_output=True, text=True, timeout=30)
         out = proc.stdout or ""
         err = proc.stderr or ""
         text = out + (("\nERR:\n" + err) if err else "")
