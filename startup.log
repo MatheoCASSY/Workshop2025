@@ -1,0 +1,56 @@
+/home/linux/projet/affichage/flipper_hacking.py:151: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup lun. 15 sept. 2025 16:20:28 CEST ===
+lun. 15 sept. 2025 16:20:28 CEST Network available. Attempting git pull (SSH)...
+Agent pid 5204
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+Votre branche est à jour avec 'origin/main'.
+Depuis github.com:MatheoCASSY/Workshop2025
+ * branch            main       -> FETCH_HEAD
+Déjà à jour.
+lun. 15 sept. 2025 16:20:38 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:151: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup lun. 15 sept. 2025 16:22:16 CEST ===
+lun. 15 sept. 2025 16:22:16 CEST Network available. Attempting git pull (SSH)...
+Agent pid 5279
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+Votre branche est à jour avec 'origin/main'.
+Depuis github.com:MatheoCASSY/Workshop2025
+ * branch            main       -> FETCH_HEAD
+Déjà à jour.
+lun. 15 sept. 2025 16:22:27 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:151: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup lun. 15 sept. 2025 16:23:52 CEST ===
+lun. 15 sept. 2025 16:23:53 CEST Network available. Attempting git pull (SSH)...
+Agent pid 918
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+Votre branche est à jour avec 'origin/main'.
+Depuis github.com:MatheoCASSY/Workshop2025
+ * branch            main       -> FETCH_HEAD
+Déjà à jour.
+lun. 15 sept. 2025 16:24:04 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:151: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+/home/linux/projet/affichage/flipper_hacking.py:151: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+Exiting menu...
+lun. 15 sept. 2025 16:25:24 CEST /home/linux/projet/affichage/flipper_hacking.py exited with status 0 at lun. 15 sept. 2025 16:25:24 CEST
+=== projet startup lun. 15 sept. 2025 16:26:47 CEST ===
+lun. 15 sept. 2025 16:26:48 CEST Network available. Attempting git pull (SSH)...
+Agent pid 914
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+Votre branche est à jour avec 'origin/main'.
+Depuis github.com:MatheoCASSY/Workshop2025
+ * branch            main       -> FETCH_HEAD
+Déjà à jour.
+lun. 15 sept. 2025 16:26:58 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:151: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+Exiting menu...
+lun. 15 sept. 2025 16:27:32 CEST /home/linux/projet/affichage/flipper_hacking.py exited with status 0 at lun. 15 sept. 2025 16:27:32 CEST
