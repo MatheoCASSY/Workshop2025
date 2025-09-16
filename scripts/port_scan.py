@@ -4,7 +4,7 @@
 # --------------------
 # Imports
 # --------------------
-import sys, time, socket, threading
+import sys, time, socket, threading, struct
 from queue import Queue
 
 try:
@@ -23,18 +23,6 @@ CONN_TIMEOUT = 0.35
 OUTPUT_LINES_PER_PAGE = 5
 
 # --------------------
-# État UI
-# --------------------
-mode = "ip_entry"            # ip_entry / lan_option / scanning / results / host_select
-octets = [192, 168, 1, 100]
-cur_octet = 0
-brightness = 128
-lan_hosts = []
-selected_host = 0
-output_lines = []
-output_offset = 0
-
-# --------------------
 # Réseau helpers
 # --------------------
 def ip_from_octets(o): return "{}.{}.{}.{}".format(*o)
@@ -49,6 +37,22 @@ def get_local_ip():
     finally:
         s.close()
     return ip
+
+def get_default_gateway():
+    """
+    Lecture de la passerelle par défaut dans /proc/net/route
+    (Linux only, ex: Raspberry Pi)
+    """
+    try:
+        with open("/proc/net/route") as f:
+            for line in f.readlines():
+                fields = line.strip().split()
+                if fields[1] != '00000000' or not int(fields[3], 16) & 2:
+                    continue
+                gw = socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
+                return gw
+    except:
+        return None
 
 def scan_ports(target_ip, ports=PORT_RANGE, threads=THREADS, timeout=CONN_TIMEOUT):
     q = Queue()
@@ -96,6 +100,22 @@ def scan_lan_quick(port_probe=80, timeout=0.18, threads=200):
     return found, local
 
 # --------------------
+# État UI
+# --------------------
+mode = "ip_entry"            # ip_entry / lan_option / scanning / results / host_select
+gw = get_default_gateway()
+if gw:
+    octets = [int(x) for x in gw.split(".")]
+else:
+    octets = [192,168,1,1]   # fallback si routeur non trouvé
+cur_octet = 0
+brightness = 128
+lan_hosts = []
+selected_host = 0
+output_lines = []
+output_offset = 0
+
+# --------------------
 # GFX helpers
 # --------------------
 if GFX:
@@ -127,6 +147,8 @@ if GFX:
             if i == cur_octet:
                 draw.rectangle((x-1,26,x+w+1,28), fill=1)
                 draw.text((x,24), p, font=font, fill=0)
+            else:
+                draw.text((x,24), p, font=font, fill=1)
             x += w + font.getsize(".")[0] + 2
         draw.text((4,H-9), "OK=start  BACK=LAN  +/- lum", font=font, fill=1)
         show_image()
@@ -209,8 +231,10 @@ def console_mode():
         ip = input(f"IP [{ip_from_octets(octets)}]: ").strip() or ip_from_octets(octets)
         print("Scanning", ip)
         ports = scan_ports(ip)
-        if ports: print("Open ports:", ports)
-        else: print("No open ports.")
+        if ports:
+            print("Open ports:", ports)
+        else:
+            print("No open ports.")
     else:
         hosts, local = scan_lan_quick()
         print("Local IP:", local)
@@ -237,20 +261,7 @@ def main_loop():
         elif mode == "lan_option":
             time.sleep(0.1)
         elif mode == "scanning":
-            local = get_local_ip()
             target = ip_from_octets(octets)
-            # if launched from LAN option -> run LAN quick scan
-            if mode == "scanning" and target == "0.0.0.0":  # unlikely default; kept for safety
-                draw_status("LAN quick...")
-                hosts, _ = scan_lan_quick()
-                lan_hosts = hosts
-                if lan_hosts:
-                    mode = "host_select"; selected_host = 0
-                    output_lines = ["Hosts:"] + lan_hosts; output_offset = 0
-                    draw_lines(output_lines, 0)
-                else:
-                    output_lines = ["No hosts found on LAN"]; mode = "results"; draw_lines(output_lines,0)
-                continue
             draw_status("Scan " + target)
             ports = scan_ports(target)
             if ports:
