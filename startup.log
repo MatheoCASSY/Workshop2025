@@ -259,3 +259,21 @@ mar. 16 sept. 2025 15:44:03 CEST Starting /home/linux/projet/affichage/flipper_h
   draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
 Exiting menu...
 mar. 16 sept. 2025 15:44:10 CEST /home/linux/projet/affichage/flipper_hacking.py exited with status 0 at mar. 16 sept. 2025 15:44:10 CEST
+=== projet startup mar. 16 sept. 2025 15:46:02 CEST ===
+mar. 16 sept. 2025 15:46:02 CEST Network available. Attempting git pull (SSH)...
+Agent pid 945
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Depuis github.com:MatheoCASSY/Workshop2025
+   eefb14b..1576ea4  main       -> origin/main
+Déjà sur 'main'
+M	startup.log
+Votre branche et 'origin/main' ont divergé,
+et ont 3 et 1 commits différents chacune respectivement.
+  (utilisez "git pull" pour fusionner la branche distante dans la vôtre)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mar. 16 sept. 2025 15:46:09 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+Exiting menu...
+mar. 16 sept. 2025 15:46:21 CEST /home/linux/projet/affichage/flipper_hacking.py exited with status 0 at mar. 16 sept. 2025 15:46:21 CEST
