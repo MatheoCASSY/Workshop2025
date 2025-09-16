@@ -18,12 +18,12 @@ if __name__ == "__main__":
     stored_hash = load_hash()
 
     if stored_hash is None:
-        password = input("Insérer mot de passe ")
+        password = input("Create a password : ")
         hashed = hash_password(password)
         save_hash(hashed)
         print("Password saved.")
     else:
-        attempt = input("Entrer  mot de passe : ")
+        attempt = input("Type a password : ")
         if verify_password(stored_hash, attempt):
             print("Correct password.")
         else:
