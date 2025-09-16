@@ -54,3 +54,135 @@ lun. 15 sept. 2025 16:26:58 CEST Starting /home/linux/projet/affichage/flipper_h
   draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
 Exiting menu...
 lun. 15 sept. 2025 16:27:32 CEST /home/linux/projet/affichage/flipper_hacking.py exited with status 0 at lun. 15 sept. 2025 16:27:32 CEST
+=== projet startup lun. 15 sept. 2025 16:46:12 CEST ===
+lun. 15 sept. 2025 16:46:12 CEST Network available. Attempting git pull (SSH)...
+Agent pid 901
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est à jour avec 'origin/main'.
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+lun. 15 sept. 2025 16:46:13 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup lun. 15 sept. 2025 17:10:24 CEST ===
+lun. 15 sept. 2025 17:10:24 CEST Network available. Attempting git pull (SSH)...
+Agent pid 901
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est à jour avec 'origin/main'.
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+lun. 15 sept. 2025 17:10:25 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup lun. 15 sept. 2025 17:16:26 CEST ===
+lun. 15 sept. 2025 17:16:27 CEST Network available. Attempting git pull (SSH)...
+Agent pid 909
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est à jour avec 'origin/main'.
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+lun. 15 sept. 2025 17:16:27 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup lun. 15 sept. 2025 17:17:27 CEST ===
+lun. 15 sept. 2025 17:17:27 CEST Network available. Attempting git pull (SSH)...
+Agent pid 1313
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est à jour avec 'origin/main'.
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+lun. 15 sept. 2025 17:17:27 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup lun. 15 sept. 2025 17:18:21 CEST ===
+=== projet startup mar. 16 sept. 2025 08:51:55 CEST ===
+mar. 16 sept. 2025 08:51:55 CEST Network available. Attempting git pull (SSH)...
+Agent pid 942
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+M	startup.log
+Votre branche est à jour avec 'origin/main'.
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mar. 16 sept. 2025 08:52:02 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup mar. 16 sept. 2025 09:09:27 CEST ===
+mar. 16 sept. 2025 09:09:27 CEST Network available. Attempting git pull (SSH)...
+Agent pid 911
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est à jour avec 'origin/main'.
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mar. 16 sept. 2025 09:09:28 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+=== projet startup mar. 16 sept. 2025 09:20:16 CEST ===
+mar. 16 sept. 2025 09:20:51 CEST Network unavailable after timeout; skipping git pull.
+mar. 16 sept. 2025 09:20:51 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
+Exiting menu...
+mar. 16 sept. 2025 09:25:13 CEST /home/linux/projet/affichage/flipper_hacking.py exited with status 0 at mar. 16 sept. 2025 09:25:13 CEST
+=== projet startup mar. 16 sept. 2025 09:25:26 CEST ===
+mar. 16 sept. 2025 09:25:26 CEST Network available. Attempting git pull (SSH)...
+Agent pid 927
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est à jour avec 'origin/main'.
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mar. 16 sept. 2025 09:25:27 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+/home/linux/projet/affichage/flipper_hacking.py:153: DeprecationWarning: getsize is deprecated and will be removed in Pillow 10 (2023-07-01). Use getbbox or getlength instead.
+  draw.text((0,(height-font.getsize(">")[1])//2), ">", font=font, fill=1)
