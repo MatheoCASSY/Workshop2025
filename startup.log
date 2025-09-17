@@ -361,3 +361,87 @@ Votre branche est en avance sur 'origin/main' de 6 commits.
 erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
 erreur : veuillez les valider ou les remiser.
 mer. 17 sept. 2025 08:39:06 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 09:03:54 CEST ===
+mer. 17 sept. 2025 09:03:55 CEST Network available. Attempting git pull (SSH)...
+Agent pid 1317
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 7 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 09:04:00 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 09:04:31 CEST ===
+mer. 17 sept. 2025 09:04:31 CEST Network available. Attempting git pull (SSH)...
+Agent pid 920
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 7 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 09:04:38 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 09:05:27 CEST ===
+mer. 17 sept. 2025 09:05:28 CEST Network available. Attempting git pull (SSH)...
+Agent pid 874
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 7 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 09:05:29 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 09:07:34 CEST ===
+mer. 17 sept. 2025 09:07:34 CEST Network available. Attempting git pull (SSH)...
+Agent pid 876
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 7 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 09:07:35 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 09:08:33 CEST ===
+mer. 17 sept. 2025 09:08:34 CEST Network available. Attempting git pull (SSH)...
+Agent pid 888
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 7 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 09:08:35 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+                === projet startup mer. 17 sept. 2025 10:20:52 CEST ===
+mer. 17 sept. 2025 10:20:53 CEST Network available. Attempting git pull (SSH)...
+Agent pid 945
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Depuis github.com:MatheoCASSY/Workshop2025
+   4f6840f..c360840  main       -> origin/main
+Déjà sur 'main'
+M	startup.log
+Votre branche et 'origin/main' ont divergé,
+et ont 7 et 1 commits différents chacune respectivement.
+  (utilisez "git pull" pour fusionner la branche distante dans la vôtre)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 10:20:59 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
