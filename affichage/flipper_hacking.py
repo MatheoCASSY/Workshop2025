@@ -392,8 +392,8 @@ def handler(ch, event):
             # Feedback + footer toujours visible
             draw.rectangle((0,0,width,height), fill=0)
             draw.text((8, height//2-12), "Déverrouillez l'appareil ?", font=font, fill=1)
-            draw.text((8, height//2+2),  "Seq: Haut - Bas - Haut", font=font, fill=1)
-            draw.text((8, height//2+14), f"Entrée: {''.join(sequence)}", font=font, fill=1)
+            #draw.text((8, height//2+2),  "Seq: Haut - Bas - Haut", font=font, fill=1) le mdp c'est secret xD
+            #draw.text((8, height//2+14), f"Entrée: {''.join(sequence)}", font=font, fill=1) pour pas afficher les touches appuyées
             draw_footer("U/D pour saisir  BACK:Retour")
             draw_image_to_lcd()
 
