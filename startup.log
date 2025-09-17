@@ -336,3 +336,17 @@ Votre branche est en avance sur 'origin/main' de 4 commits.
 erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
 erreur : veuillez les valider ou les remiser.
 mar. 16 sept. 2025 15:59:49 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 08:36:19 CEST ===
+mer. 17 sept. 2025 08:36:19 CEST Network available. Attempting git pull (SSH)...
+Agent pid 947
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Depuis github.com:MatheoCASSY/Workshop2025
+   1576ea4..71bed46  main       -> origin/main
+Déjà sur 'main'
+M	startup.log
+Votre branche et 'origin/main' ont divergé,
+et ont 5 et 1 commits différents chacune respectivement.
+  (utilisez "git pull" pour fusionner la branche distante dans la vôtre)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 08:36:26 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
