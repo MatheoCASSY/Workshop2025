@@ -36,10 +36,10 @@ draw = ImageDraw.Draw(image)
 # ------------------------
 ICONS = {
     "Wi-Fi Scan": ["00100","01010","10001","00000","00100","00000","00100","00000"],
-    "Port Scan": ["11111","10001","10101","10001","11111","00000","00000","00000"],
+    "Port Scan":  ["11111","10001","10101","10001","11111","00000","00000","00000"],
     "Keylogger Sim": ["01010","10101","01010","10101","01010","00000","01010","00000"],
-    "NFC Sim": ["00100","01010","00100","01010","00100","00000","00100","00000"],
-    "Exit": ["11111","10001","10101","10001","11111","00000","00000","00000"]
+    "NFC Sim":    ["00100","01010","00100","01010","00100","00000","00100","00000"],
+    "Exit":       ["11111","10001","10101","10001","11111","00000","00000","00000"]
 }
 
 # ------------------------
@@ -48,7 +48,7 @@ ICONS = {
 current_index = 0
 trigger_action = False
 mode = "lock"            # lock / unlock_confirm / menu / output / loading
-sequence = []            # pour combinaison U-D-U
+sequence = []            # pour combinaison U-D-U (uniquement en unlock_confirm)
 output_lines = []
 output_offset = 0
 OUTPUT_LINES_PER_PAGE = 5
@@ -60,8 +60,46 @@ tama_happiness = 5
 tama_cleanliness = 5
 tama_eye_open = True
 
-LUCARIO_IDLE_1 = ["0000011001100000","0000111111110000","0001111111111000","0011101101101110","0011001111110011","0110011111111001","0110010111101001","0110011111111001","0110011000011001","0011000111100011","0011100000000110","0001110000001110","0000111000011100","0000011100111000","0000001111110000","0000000111100000",]
-LUCARIO_IDLE_2 = ["0000011001100000","0000111111110000","0001111111111000","0011101101101110","0011001111110011","0110011111111001","0110010111101001","0110011111111001","0110011000011001","0011000111100011","0011100000000110","0001110000001110","0000111000011100","0000011111111000","0000000000000000","0000000111100000",]
+# ------------------------
+# PIKACHU 16x16 (2 frames)
+# ------------------------
+PIKACHU_IDLE_1 = [
+    "0000100001000000",
+    "0001110011100000",
+    "0011111111110000",
+    "0010111111010000",
+    "0011111111111000",
+    "0011101101111100",
+    "0011010000111000",
+    "0011111111110000",
+    "0001111111100000",
+    "0000111111000000",
+    "0001111111110000",
+    "0011111111110000",
+    "0011101110110000",
+    "0011001110010000",
+    "0001100001100000",
+    "0000111111000000",
+]
+
+PIKACHU_IDLE_2 = [
+    "0000100001000000",
+    "0001110011100000",
+    "0011111111110000",
+    "0010111111010000",
+    "0011111111110000",
+    "0011101101111000",
+    "0011000000110000",
+    "0011111111110000",
+    "0001111111100000",
+    "0000111111000000",
+    "0001111111110000",
+    "0011111111110000",
+    "0011101101110000",
+    "0011001110010000",
+    "0001100001100000",
+    "0000111111000000",
+]
 
 # ------------------------
 # Cleanup on exit
@@ -84,7 +122,7 @@ def draw_image_to_lcd():
     pix = image.load()
     for y in range(height):
         for x in range(width):
-            lcd.set_pixel(x, y, 1 if pix[x,y] else 0)
+            lcd.set_pixel(x, y, 1 if pix[x, y] else 0)
     lcd.show()
 
 def draw_bitmap(x_offset, y_offset, bitmap_rows, invert=False):
@@ -97,14 +135,41 @@ def draw_bitmap(x_offset, y_offset, bitmap_rows, invert=False):
             if 0 <= px < width and 0 <= py < height:
                 draw.point((px, py), 0 if invert else 1)
 
+def draw_bitmap_scaled(x_offset, y_offset, bitmap_rows, scale=1, invert=False):
+    # Dessin nearest-neighbor (pixel-art), échelle entière
+    if scale <= 1:
+        draw_bitmap(x_offset, y_offset, bitmap_rows, invert=invert)
+        return
+    for ry, row in enumerate(bitmap_rows):
+        for rx, ch in enumerate(row):
+            if ch != '1':
+                continue
+            x0 = x_offset + rx*scale
+            y0 = y_offset + ry*scale
+            x1 = x0 + scale - 1
+            y1 = y0 + scale - 1
+            if x0 >= width or y0 >= height or x1 < 0 or y1 < 0:
+                continue
+            draw.rectangle((x0, y0, min(x1, width-1), min(y1, height-1)), fill=(0 if invert else 1))
+
 def draw_icon_on_image(x_offset, y_offset, icon_rows, invert=False):
     for ry, row in enumerate(icon_rows):
         for rx, ch in enumerate(row):
-            if ch != "1": continue
+            if ch != "1": 
+                continue
             px = x_offset + rx
             py = y_offset + ry
             if 0 <= px < width and 0 <= py < height:
                 draw.point((px, py), 0 if invert else 1)
+
+def draw_footer(text):
+    # Affiche une ligne d’instructions en bas, tronquée si nécessaire
+    footer_y = height - 9
+    max_w = width - 4
+    t = text
+    while draw.textlength(t, font=font) > max_w and len(t) > 3:
+        t = t[:-4] + "..."
+    draw.text((2, footer_y), t, font=font, fill=1)
 
 # ------------------------
 # Loading screen + barre
@@ -130,12 +195,40 @@ def draw_loading_screen(title="Loading...", seconds=1.2):
 # ------------------------
 def draw_tamagotchi():
     draw.rectangle((0,0,width,height), fill=0)
-    draw.text((2,0), f"H:{tama_hunger} P:{tama_happiness} C:{tama_cleanliness}", font=font, fill=1)
-    sprite = LUCARIO_IDLE_1 if tama_eye_open else LUCARIO_IDLE_2
-    sx = (width // 2) - 8
-    sy = 18
-    draw_bitmap(sx, sy, sprite)
-    draw.text((2, height-9), "OK=Action  +/- : Nourrir/Jouer  BACK=Lock", font=font, fill=1)
+
+    # Ligne de stats (haut)
+    top_text = f"H:{tama_hunger} P:{tama_happiness} C:{tama_cleanliness}"
+    draw.text((2,0), top_text, font=font, fill=1)
+    stats_h = 9  # bandeau texte haut
+    footer_h = 9 # bandeau texte bas
+
+    # Zone disponible au centre pour le sprite
+    avail_h = height - (stats_h + footer_h)  # ex: 64 - 18 = 46 px
+    base = 16
+    # Échelle entière max qui tient en hauteur ET largeur
+    scale_h = max(1, avail_h // base)
+    scale_w = max(1, (width) // base)
+    scale = max(1, min(scale_h, scale_w))
+    # Évite de rogner les instructions si échelle trop grande
+    # (on garde 1 px de marge)
+    while (base*scale) > (avail_h):
+        scale -= 1
+        if scale <= 1:
+            break
+
+    sprite = PIKACHU_IDLE_1 if tama_eye_open else PIKACHU_IDLE_2
+
+    sprite_w = base * scale
+    sprite_h = base * scale
+    sx = (width - sprite_w) // 2
+    sy = stats_h + ((avail_h - sprite_h) // 2)
+
+    # Dessin du sprite à l’échelle
+    draw_bitmap_scaled(sx, sy, sprite, scale=scale)
+
+    # Instructions (bas) – toujours visibles
+    draw_footer("OK:Action  +/-:Nourrir/Jouer  BACK:Unlock")
+
     draw_image_to_lcd()
 
 def animate_tamagotchi():
@@ -177,6 +270,10 @@ def draw_menu():
 
     # Simple left cursor
     draw.text((0,(height - font.getbbox(">")[3])//2), ">", font=font, fill=1)
+
+    # Footer court pour cohérence UI
+    draw_footer("BACK:Lock  OK:Lancer  +/-:Lum  U/D:Nav")
+
     draw_image_to_lcd()
 
 # ------------------------
@@ -193,7 +290,7 @@ def draw_output():
         if idx >= len(output_lines):
             break
         draw.text((4, top + i*10), output_lines[idx], font=font, fill=1)
-    draw.text((4, height - 9), "<BACK pour menu> +/- Lum", font=font, fill=1)
+    draw_footer("<BACK menu>  +/- Lum  U/D Scroll")
     draw_image_to_lcd()
 
 # ------------------------
@@ -201,7 +298,6 @@ def draw_output():
 # ------------------------
 def run_script_capture(path):
     try:
-        # si tu as un venv, remplace python3 par son chemin si nécessaire
         proc = subprocess.run(["python3", path], capture_output=True, text=True, timeout=30)
         out = proc.stdout or ""
         err = proc.stderr or ""
@@ -260,20 +356,23 @@ def handler(ch, event):
     if mode == "loading":
         return
 
+    # ------------------------
     # Lock / unlock prompt
+    # ------------------------
     if mode in ("lock", "unlock_confirm"):
-        if ch == 2:  # BACK pressed -> show loading then unlock prompt
+        if ch == 2:  # BACK -> écran de confirmation + reset séquence
             mode = "loading"
             draw_loading_screen("Chargement...", seconds=1.0)
             mode = "unlock_confirm"
             draw.rectangle((0,0,width,height), fill=0)
-            draw.text((8, height//2-10), "Déverouillez l'appareil ?", font=font, fill=1)
-            draw.text((8, height//2+6), "Seq: Haut Bas Haut", font=font, fill=1)
+            draw.text((8, height//2-12), "Déverrouillez l'appareil ?", font=font, fill=1)
+            draw.text((8, height//2+2),  "Seq: Haut - Bas - Haut", font=font, fill=1)
+            draw_footer("U/D pour saisir  BACK:Retour")
             draw_image_to_lcd()
             sequence = []
             return
 
-        # mini interactions pendant lock
+        # mini interactions pendant lock (et unlock_confirm)
         if ch == 4:  # OK
             tama_hunger = max(0, tama_hunger-1)
             tama_happiness = min(10, tama_happiness+1)
@@ -284,27 +383,38 @@ def handler(ch, event):
         elif ch == 3:
             tama_happiness = min(10, tama_happiness+1)
             draw_tamagotchi(); return
-        elif ch == 0:
-            sequence.append('U')
-            draw.rectangle((0,0,width,height), fill=0)
-            draw.text((10, height//2-5), "Haut", font=font, fill=1)
-            draw_image_to_lcd(); return
-        elif ch == 1:
-            sequence.append('D')
-            draw.rectangle((0,0,width,height), fill=0)
-            draw.text((10, height//2-5), "Bas", font=font, fill=1)
-            draw_image_to_lcd(); return
 
-        # check combo U-D-U
-        if len(sequence) >= 3 and sequence[-3:] == ['U','D','U']:
-            mode = "loading"
-            draw_loading_screen("Ouverture du menu...", seconds=0.9)
-            mode = "menu"
-            sequence = []
-            draw_menu()
+        if mode == "unlock_confirm":
+            if ch == 0:
+                sequence.append('U')
+            elif ch == 1:
+                sequence.append('D')
+            if len(sequence) > 3:
+                sequence = sequence[-3:]
+
+            # Feedback + footer toujours visible
+            draw.rectangle((0,0,width,height), fill=0)
+            draw.text((8, height//2-12), "Déverrouillez l'appareil ?", font=font, fill=1)
+            draw.text((8, height//2+2),  "Seq: Haut - Bas - Haut", font=font, fill=1)
+            draw.text((8, height//2+14), f"Entrée: {''.join(sequence)}", font=font, fill=1)
+            draw_footer("U/D pour saisir  BACK:Retour")
+            draw_image_to_lcd()
+
+            if len(sequence) == 3 and sequence == ['U','D','U']:
+                mode = "loading"
+                draw_loading_screen("Ouverture du menu...", seconds=0.9)
+                mode = "menu"
+                sequence = []
+                draw_menu()
+            return
+
+        if mode == "lock":
+            draw_tamagotchi()
         return
 
+    # ------------------------
     # Menu interactions
+    # ------------------------
     if mode == "menu":
         if ch == 0:
             current_index = (current_index - 1) % len(MENU_ITEMS)
@@ -315,17 +425,14 @@ def handler(ch, event):
         elif ch == 4:  # OK -> exécute
             name, path = MENU_ITEMS[current_index]
             if name.lower().startswith("exit"):
-                # lancement du script exit_script.py puis quitter proprement
                 try:
                     subprocess.run(["python3", path])
                 except Exception:
                     pass
                 cleanup()
                 sys.exit(0)
-            # loading animation
             mode = "loading"
             draw_loading_screen(f"Lancement: {name}", seconds=1.2)
-            # run and capture
             output_lines.clear()
             output_lines.extend(run_script_capture(path))
             output_offset = 0
