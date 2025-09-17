@@ -564,3 +564,30 @@ erreur : de plus, votre index contient des modifications non validées.
 erreur : veuillez les valider ou les remiser.
 mer. 17 sept. 2025 15:14:24 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
 mer. 17 sept. 2025 15:18:54 CEST /home/linux/projet/affichage/flipper_hacking.py exited with status 0 at mer. 17 sept. 2025 15:18:54 CEST
+=== projet startup mer. 17 sept. 2025 15:19:49 CEST ===
+mer. 17 sept. 2025 15:19:50 CEST Network available. Attempting git pull (SSH)...
+Agent pid 946
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 16 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 15:19:56 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 15:44:14 CEST ===
+mer. 17 sept. 2025 15:44:15 CEST Network available. Attempting git pull (SSH)...
+Agent pid 923
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+ssh: connect to host github.com port 22: Connection timed out
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 16 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 15:46:32 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
