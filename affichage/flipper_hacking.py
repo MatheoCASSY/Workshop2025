@@ -1,191 +1,384 @@
-#!/usr/bin/env python3
-
-import time, sys, atexit
+import time
+import sys
+import atexit
+import subprocess
+from os.path import expanduser
 from gfxhat import lcd, backlight, touch, fonts
 from PIL import Image, ImageFont, ImageDraw
 
 # ------------------------
-# Setup
+# Paths / Menu items (fournis)
+# ------------------------
+HOME = expanduser("~")
+SCRIPTS_DIR = HOME + "/projet/scripts"
+MENU_ITEMS = [
+    ("Wi-Fi Scan", SCRIPTS_DIR + "/wifi_scan.py"),
+    ("Port Scan", SCRIPTS_DIR + "/port_scan.py"),
+    ("Keylogger Sim", SCRIPTS_DIR + "/keylogger_sim.py"),
+    ("NFC Sim", SCRIPTS_DIR + "/nfc_sim.py"),
+    ("Exit", SCRIPTS_DIR + "/exit_script.py"),
+]
+
+# ------------------------
+# Init écran / police
 # ------------------------
 width, height = lcd.dimensions()
-image = Image.new('1', (width, height))
-draw = ImageDraw.Draw(image)
 try:
     font = ImageFont.truetype(fonts.BitbuntuFull, 10)
-except:
+except Exception:
     font = ImageFont.load_default()
 
-brightness = 128
-backlight.set_all(brightness, brightness, brightness)
-backlight.show()
+image = Image.new('1', (width, height))
+draw = ImageDraw.Draw(image)
 
 # ------------------------
-# Tamagotchi State
+# Icônes pour menu (style 0/1)
 # ------------------------
+ICONS = {
+    "Wi-Fi Scan": ["00100","01010","10001","00000","00100","00000","00100","00000"],
+    "Port Scan": ["11111","10001","10101","10001","11111","00000","00000","00000"],
+    "Keylogger Sim": ["01010","10101","01010","10101","01010","00000","01010","00000"],
+    "NFC Sim": ["00100","01010","00100","01010","00100","00000","00100","00000"],
+    "Exit": ["11111","10001","10101","10001","11111","00000","00000","00000"]
+}
+
+# ------------------------
+# États et variables UI / Tamagotchi
+# ------------------------
+current_index = 0
+trigger_action = False
+mode = "lock"            # lock / unlock_confirm / menu / output / loading
+sequence = []            # pour combinaison U-D-U
+output_lines = []
+output_offset = 0
+OUTPUT_LINES_PER_PAGE = 5
+brightness = 128
+
+# Tamagotchi stats + sprite 16x16 (2 frames)
 tama_hunger = 5
 tama_happiness = 5
 tama_cleanliness = 5
 tama_eye_open = True
-tama_mouth_open = False
+
+LUCARIO_IDLE_1 = ["0000011001100000","0000111111110000","0001111111111000","0011101101101110","0011001111110011","0110011111111001","0110010111101001","0110011111111001","0110011000011001","0011000111100011","0011100000000110","0001110000001110","0000111000011100","0000011100111000","0000001111110000","0000000111100000",]
+LUCARIO_IDLE_2 = ["0000011001100000","0000111111110000","0001111111111000","0011101101101110","0011001111110011","0110011111111001","0110010111101001","0110011111111001","0110011000011001","0011000111100011","0011100000000110","0001110000001110","0000111000011100","0000011111111000","0000000000000000","0000000111100000",]
 
 # ------------------------
-# UI State
-# ------------------------
-mode = "lock"        # lock / unlock_confirm / menu / output
-sequence = []        # pour la combinaison haut-bas-haut
-trigger_action = False
-current_index = 0
-OUTPUT_LINES_PER_PAGE = 5
-output_lines = []
-output_offset = 0
-
-MENU_ITEMS = [
-    ("Wi-Fi Scan", None),
-    ("Port Scan", None),
-    ("Keylogger Sim", None),
-    ("NFC Sim", None),
-    ("Exit", None)
-]
-
-# ------------------------
-# Helpers
+# Cleanup on exit
 # ------------------------
 def cleanup():
-    backlight.set_all(0,0,0)
-    backlight.show()
-    lcd.clear()
-    lcd.show()
+    try:
+        backlight.set_all(0,0,0)
+        backlight.show()
+        lcd.clear()
+        lcd.show()
+    except Exception:
+        pass
+
 atexit.register(cleanup)
 
-def draw_image():
+# ------------------------
+# Draw helpers
+# ------------------------
+def draw_image_to_lcd():
     pix = image.load()
     for y in range(height):
         for x in range(width):
             lcd.set_pixel(x, y, 1 if pix[x,y] else 0)
     lcd.show()
 
+def draw_bitmap(x_offset, y_offset, bitmap_rows, invert=False):
+    for ry, row in enumerate(bitmap_rows):
+        for rx, ch in enumerate(row):
+            if ch != '1':
+                continue
+            px = x_offset + rx
+            py = y_offset + ry
+            if 0 <= px < width and 0 <= py < height:
+                draw.point((px, py), 0 if invert else 1)
+
+def draw_icon_on_image(x_offset, y_offset, icon_rows, invert=False):
+    for ry, row in enumerate(icon_rows):
+        for rx, ch in enumerate(row):
+            if ch != "1": continue
+            px = x_offset + rx
+            py = y_offset + ry
+            if 0 <= px < width and 0 <= py < height:
+                draw.point((px, py), 0 if invert else 1)
+
 # ------------------------
-# Tamagotchi Drawing
+# Loading screen + barre
+# ------------------------
+def draw_loading_screen(title="Loading...", seconds=1.2):
+    steps = 20
+    delay = max(0.01, seconds / steps)
+    draw.rectangle((0,0,width,height), fill=0)
+    draw.text((4,8), title, font=font, fill=1)
+    bar_x, bar_y = 6, 30
+    bar_w, bar_h = width - 12, 8
+    for s in range(steps+1):
+        draw.rectangle((bar_x,bar_y,bar_x+bar_w,bar_y+bar_h), fill=0)
+        draw.rectangle((bar_x-1,bar_y-1,bar_x+bar_w+1,bar_y+bar_h+1), outline=1)
+        fill_w = int((s/steps) * bar_w)
+        if fill_w > 0:
+            draw.rectangle((bar_x,bar_y,bar_x+fill_w,bar_y+bar_h), fill=1)
+        draw_image_to_lcd()
+        time.sleep(delay)
+
+# ------------------------
+# Tamagotchi drawing / animation (lock screen)
 # ------------------------
 def draw_tamagotchi():
-    global tama_eye_open, tama_mouth_open
     draw.rectangle((0,0,width,height), fill=0)
     draw.text((2,0), f"H:{tama_hunger} P:{tama_happiness} C:{tama_cleanliness}", font=font, fill=1)
-    # Corps simple
-    draw.ellipse((40,20,60,40), fill=1)
-    # Yeux
-    if tama_eye_open:
-        draw.point((45,25), fill=0)
-        draw.point((55,25), fill=0)
-    else:
-        draw.line((45,25,46,25), fill=0)
-        draw.line((55,25,56,25), fill=0)
-    # Bouche
-    if tama_mouth_open:
-        draw.line((45,35,55,35), fill=0)
-    else:
-        draw.line((45,36,55,36), fill=0)
-    draw.text((2, height-9), "OK=Action  +/- : Feed/Play", font=font, fill=1)
-    draw_image()
+    sprite = LUCARIO_IDLE_1 if tama_eye_open else LUCARIO_IDLE_2
+    sx = (width // 2) - 8
+    sy = 18
+    draw_bitmap(sx, sy, sprite)
+    draw.text((2, height-9), "OK=Action  +/- : Nourrir/Jouer  BACK=Lock", font=font, fill=1)
+    draw_image_to_lcd()
 
 def animate_tamagotchi():
-    global tama_eye_open, tama_mouth_open
-    # Clignement
+    global tama_eye_open
     tama_eye_open = not tama_eye_open
-    # Bouche qui bouge
-    tama_mouth_open = not tama_mouth_open
     draw_tamagotchi()
 
 # ------------------------
-# Menu Drawing
+# Menu style Flipper Zero (affichage)
 # ------------------------
 def draw_menu():
     draw.rectangle((0,0,width,height), fill=0)
-    draw.text((4,1), "Menu", font=font, fill=1)
-    start_y = 12
+    # Header (inversé)
+    draw.rectangle((0,0,width,9), fill=1)
+    draw.text((4,1), time.strftime("%H:%M"), font=font, fill=0)
+    draw.text((width-36,1), f"L:{brightness}", font=font, fill=0)
+
+    if not MENU_ITEMS:
+        msg1, msg2 = "Aucun programme", "installe"
+        w1 = draw.textlength(msg1, font=font)
+        w2 = draw.textlength(msg2, font=font)
+        draw.text(((width - w1)//2, (height//2)-12), msg1, font=font, fill=1)
+        draw.text(((width - w2)//2, (height//2)+2), msg2, font=font, fill=1)
+        draw.text((0,(height - font.getbbox(">")[3])//2), ">", font=font, fill=1)
+        draw_image_to_lcd()
+        return
+
+    # Scrolling menu with icons and selection bar
+    start_y = (height // 2) - 4
+    offset_top = current_index * 12
     for idx, (name, _) in enumerate(MENU_ITEMS):
+        y = (idx*12) + start_y - offset_top
+        icon = ICONS.get(name, ["00000"]*8)
         invert = (idx == current_index)
         if invert:
-            draw.rectangle((0, start_y+idx*12, width, start_y+idx*12+10), fill=1)
-            draw.text((4, start_y+idx*12), name, font=font, fill=0)
-        else:
-            draw.text((4, start_y+idx*12), name, font=font, fill=1)
-    draw_image()
+            draw.rectangle(((20-4, y-1), (width, y+10)), fill=1)
+        draw_icon_on_image(2, y, icon, invert=invert)
+        draw.text((20, y), name, font=font, fill=0 if invert else 1)
+
+    # Simple left cursor
+    draw.text((0,(height - font.getbbox(">")[3])//2), ">", font=font, fill=1)
+    draw_image_to_lcd()
 
 # ------------------------
-# Touch Handler
+# Output display (after running a script)
 # ------------------------
-def touch_handler(ch, event):
-    global mode, sequence, trigger_action, current_index
-    global tama_hunger, tama_happiness, tama_cleanliness
+def draw_output():
+    draw.rectangle((0,0,width,height), fill=0)
+    draw.rectangle((0,0,width,9), fill=1)
+    draw.text((4,1), time.strftime("%H:%M"), font=font, fill=0)
+    draw.text((width-36,1), f"L:{brightness}", font=font, fill=0)
+    top = 12
+    for i in range(OUTPUT_LINES_PER_PAGE):
+        idx = output_offset + i
+        if idx >= len(output_lines):
+            break
+        draw.text((4, top + i*10), output_lines[idx], font=font, fill=1)
+    draw.text((4, height - 9), "<BACK pour menu> +/- Lum", font=font, fill=1)
+    draw_image_to_lcd()
 
-    if event != "press": return
+# ------------------------
+# Execution helper (capture stdout/stderr)
+# ------------------------
+def run_script_capture(path):
+    try:
+        # si tu as un venv, remplace python3 par son chemin si nécessaire
+        proc = subprocess.run(["python3", path], capture_output=True, text=True, timeout=30)
+        out = proc.stdout or ""
+        err = proc.stderr or ""
+        text = out + (("\nERR:\n" + err) if err else "")
+    except subprocess.TimeoutExpired:
+        text = "Script timeout."
+    except Exception as e:
+        text = "Error running script: " + str(e)
 
-    if mode == "lock":
-        if ch == 0:  # Up
+    lines = []
+    for line in text.splitlines():
+        max_chars = 20
+        for i in range(0, len(line), max_chars):
+            lines.append(line[i:i+max_chars])
+    if not lines:
+        lines = ["<no output>"]
+    return lines
+
+# ------------------------
+# Touch handler (0=Up,1=Down,2=Back,3=-,4=OK,5=+)
+# ------------------------
+def handler(ch, event):
+    global current_index, trigger_action, mode, output_offset, brightness, output_lines
+    global tama_hunger, tama_happiness, tama_cleanliness, sequence
+
+    if event != "press":
+        return
+
+    # If viewing output
+    if mode == "output":
+        if ch == 0:
+            output_offset = max(0, output_offset - 1)
+            draw_output()
+            return
+        elif ch == 1:
+            max_off = max(0, len(output_lines) - OUTPUT_LINES_PER_PAGE)
+            output_offset = min(max_off, output_offset + 1)
+            draw_output()
+            return
+        elif ch == 2:
+            mode = "menu"
+            draw_menu()
+            return
+        elif ch == 5:
+            brightness = min(255, brightness + 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
+            draw_output()
+            return
+        elif ch == 3:
+            brightness = max(0, brightness - 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
+            draw_output()
+            return
+
+    # Ignore presses during explicit loading
+    if mode == "loading":
+        return
+
+    # Lock / unlock prompt
+    if mode in ("lock", "unlock_confirm"):
+        if ch == 2:  # BACK pressed -> show loading then unlock prompt
+            mode = "loading"
+            draw_loading_screen("Chargement...", seconds=1.0)
+            mode = "unlock_confirm"
+            draw.rectangle((0,0,width,height), fill=0)
+            draw.text((8, height//2-10), "Déverouillez l'appareil ?", font=font, fill=1)
+            draw.text((8, height//2+6), "Seq: Haut Bas Haut", font=font, fill=1)
+            draw_image_to_lcd()
+            sequence = []
+            return
+
+        # mini interactions pendant lock
+        if ch == 4:  # OK
+            tama_hunger = max(0, tama_hunger-1)
+            tama_happiness = min(10, tama_happiness+1)
+            draw_tamagotchi(); return
+        elif ch == 5:
+            tama_hunger = max(0, tama_hunger-1)
+            draw_tamagotchi(); return
+        elif ch == 3:
+            tama_happiness = min(10, tama_happiness+1)
+            draw_tamagotchi(); return
+        elif ch == 0:
             sequence.append('U')
             draw.rectangle((0,0,width,height), fill=0)
-            draw.text((10, height//2-5), "Déverrouiller l'appareil ?", font=font, fill=1)
-            draw_image()
-        elif ch == 1:  # Down
+            draw.text((10, height//2-5), "Haut", font=font, fill=1)
+            draw_image_to_lcd(); return
+        elif ch == 1:
             sequence.append('D')
-        elif ch == 4:  # OK : interaction avec Tamagotchi
-            tama_hunger = max(0, tama_hunger-1)
-            tama_happiness = min(10, tama_happiness+1)
-            draw_tamagotchi()
-        elif ch == 5:  # + nourrir
-            tama_hunger = max(0, tama_hunger-1)
-            draw_tamagotchi()
-        elif ch == 3:  # - jouer
-            tama_happiness = min(10, tama_happiness+1)
-            draw_tamagotchi()
+            draw.rectangle((0,0,width,height), fill=0)
+            draw.text((10, height//2-5), "Bas", font=font, fill=1)
+            draw_image_to_lcd(); return
 
-        # Check sequence: Up -> Down -> Up
-        if sequence[-3:] == ['U','D','U']:
+        # check combo U-D-U
+        if len(sequence) >= 3 and sequence[-3:] == ['U','D','U']:
+            mode = "loading"
+            draw_loading_screen("Ouverture du menu...", seconds=0.9)
             mode = "menu"
-            sequence.clear()
+            sequence = []
             draw_menu()
         return
 
+    # Menu interactions
     if mode == "menu":
-        if ch == 0:  # Up
-            current_index = (current_index-1)%len(MENU_ITEMS)
-            draw_menu()
-        elif ch == 1:  # Down
-            current_index = (current_index+1)%len(MENU_ITEMS)
-            draw_menu()
-        elif ch == 4:  # OK
-            name, _ = MENU_ITEMS[current_index]
-            if name == "Exit":
-                mode = "lock"
-                # reset Tamagotchi
-                tama_hunger = 5
-                tama_happiness = 5
-                tama_cleanliness = 5
-                draw_tamagotchi()
-            else:
-                # placeholder pour action des scripts
-                draw.rectangle((0,0,width,height), fill=0)
-                draw.text((4,10), f"Exécution {name}", font=font, fill=1)
-                draw_image()
-        elif ch == 2:  # Back
+        if ch == 0:
+            current_index = (current_index - 1) % len(MENU_ITEMS)
+            draw_menu(); return
+        elif ch == 1:
+            current_index = (current_index + 1) % len(MENU_ITEMS)
+            draw_menu(); return
+        elif ch == 4:  # OK -> exécute
+            name, path = MENU_ITEMS[current_index]
+            if name.lower().startswith("exit"):
+                # lancement du script exit_script.py puis quitter proprement
+                try:
+                    subprocess.run(["python3", path])
+                except Exception:
+                    pass
+                cleanup()
+                sys.exit(0)
+            # loading animation
+            mode = "loading"
+            draw_loading_screen(f"Lancement: {name}", seconds=1.2)
+            # run and capture
+            output_lines.clear()
+            output_lines.extend(run_script_capture(path))
+            output_offset = 0
+            mode = "output"
+            draw_output()
+            return
+        elif ch == 2:  # BACK -> reverrouiller
+            mode = "loading"
+            draw_loading_screen("Verrouillage...", seconds=0.6)
             mode = "lock"
             draw_tamagotchi()
+            return
+        elif ch == 5:
+            brightness = min(255, brightness + 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
+            draw_menu(); return
+        elif ch == 3:
+            brightness = max(0, brightness - 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
+            draw_menu(); return
 
+# ------------------------
+# Hook touches
+# ------------------------
 for i in range(6):
-    try: touch.on(i, touch_handler)
+    try: touch.set_led(i, 0)
+    except: pass
+    try: backlight.set_pixel(i, 255, 255, 255)
+    except: pass
+    try: touch.on(i, handler)
     except: pass
 
+backlight.set_all(brightness, brightness, brightness)
+backlight.show()
+
 # ------------------------
-# Main Loop
+# Main loop
 # ------------------------
 draw_tamagotchi()
-
 try:
     while True:
         if mode == "lock":
-            animate_tamagotchi()
-        time.sleep(0.5)
+            animate_tamagotchi(); time.sleep(0.5)
+        elif mode == "menu":
+            draw_menu(); time.sleep(0.2)
+        elif mode == "output":
+            draw_output(); time.sleep(0.2)
+        elif mode == "unlock_confirm":
+            time.sleep(0.2)
+        elif mode == "loading":
+            time.sleep(0.1)
+        else:
+            time.sleep(0.2)
 except KeyboardInterrupt:
     cleanup()
     sys.exit(0)
