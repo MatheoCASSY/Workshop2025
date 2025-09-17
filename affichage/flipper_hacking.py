@@ -61,15 +61,15 @@ tama_cleanliness = 5
 tama_eye_open = True
 
 # ------------------------
-# PIKACHU 16x16 (2 frames)
+# mascotte 16x16 (2 frames)
 # ------------------------
-PIKACHU_IDLE_1 = [
+mascotte_IDLE_1 = [
     "0000100001000000",
     "0001110011100000",
     "0011111111110000",
     "0010111111010000",
     "0011111111111000",
-    "0011101101111100",
+    "0011101101111000",
     "0011010000111000",
     "0011111111110000",
     "0001111111100000",
@@ -82,13 +82,13 @@ PIKACHU_IDLE_1 = [
     "0000111111000000",
 ]
 
-PIKACHU_IDLE_2 = [
+mascotte_IDLE_2 = [
     "0000100001000000",
     "0001110011100000",
     "0011111111110000",
     "0010111111010000",
     "0011111111110000",
-    "0011101101111000",
+    "0011101101110000",
     "0011000000110000",
     "0011111111110000",
     "0001111111100000",
@@ -216,7 +216,7 @@ def draw_tamagotchi():
         if scale <= 1:
             break
 
-    sprite = PIKACHU_IDLE_1 if tama_eye_open else PIKACHU_IDLE_2
+    sprite = mascotte_IDLE_1 if tama_eye_open else mascotte_IDLE_2
 
     sprite_w = base * scale
     sprite_h = base * scale
