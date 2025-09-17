@@ -445,3 +445,26 @@ et ont 7 et 1 commits différents chacune respectivement.
 erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
 erreur : veuillez les valider ou les remiser.
 mer. 17 sept. 2025 10:20:59 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 10:23:33 CEST ===
+mer. 17 sept. 2025 10:23:34 CEST Network available. Attempting git pull (SSH)...
+Agent pid 928
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 8 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 10:23:40 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup mer. 17 sept. 2025 10:24:17 CEST ===
+mer. 17 sept. 2025 10:24:17 CEST Network available. Attempting git pull (SSH)...
+Agent pid 928
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+Déjà sur 'main'
+M	startup.log
+Votre branche est en avance sur 'origin/main' de 8 commits.
+  (utilisez "git push" pour publier vos commits locaux)
+erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
+erreur : veuillez les valider ou les remiser.
+mer. 17 sept. 2025 10:24:23 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+Exiting menu...
