@@ -1156,3 +1156,10 @@ jeu. 18 sept. 2025 14:00:25 CEST Network available. Proceeding with git operatio
 Agent pid 1711
 Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
 jeu. 18 sept. 2025 14:00:25 CEST Local HEAD before operations: 3090cdd377a0efa1e4c522aa86250fc818a333ef
+jeu. 18 sept. 2025 14:00:40 CEST Reset to origin/main successful.
+jeu. 18 sept. 2025 14:00:40 CEST Changes applied from remote. Rebooting system now...
+=== projet startup jeu. 18 sept. 2025 14:00:49 CEST ===
+jeu. 18 sept. 2025 14:00:51 CEST Network available. Proceeding with git operations...
+Agent pid 714
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+jeu. 18 sept. 2025 14:00:51 CEST Local HEAD before operations: 77d2a80bf6ed6861b07d9716f9a4e73eeb4a8f9e
