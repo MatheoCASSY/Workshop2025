@@ -612,3 +612,7 @@ jeu. 18 sept. 2025 08:23:14 CEST Network available. Proceeding with git operatio
 Agent pid 922
 Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
 jeu. 18 sept. 2025 08:23:14 CEST Local HEAD before operations: daacccfc194876a147e00b8ce7492b2ed296dfdc
+jeu. 18 sept. 2025 08:23:30 CEST Reset to origin/main successful.
+jeu. 18 sept. 2025 08:23:30 CEST Changes applied from remote. Rebooting system now...
+Call to Reboot failed: Interactive authentication required.
+jeu. 18 sept. 2025 08:23:30 CEST Reboot command failed or returned. Exiting.

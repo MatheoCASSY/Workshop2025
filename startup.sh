@@ -9,7 +9,7 @@ LOG="/home/linux/projet/startup.log"
 PY="/usr/bin/python3"
 GIT="/usr/bin/git"
 PROJ_DIR="/home/linux/projet"
-SCRIPT="$PROJ_DIR/affichage/home.py"
+SCRIPT="$PROJ_DIR/affichage/Home.py"
 SSH_KEY="/home/linux/.ssh/id_ed25519"
 
 echo "=== projet startup $(date) ===" >> "$LOG"
