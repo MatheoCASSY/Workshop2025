@@ -607,3 +607,8 @@ Votre branche est en avance sur 'origin/main' de 17 commits.
 erreur : impossible de tirer avec un rebasage : vous avez des modifications non indexées.
 erreur : veuillez les valider ou les remiser.
 mer. 17 sept. 2025 15:56:56 CEST Starting /home/linux/projet/affichage/flipper_hacking.py
+=== projet startup jeu. 18 sept. 2025 08:23:13 CEST ===
+jeu. 18 sept. 2025 08:23:14 CEST Network available. Proceeding with git operations...
+Agent pid 922
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+jeu. 18 sept. 2025 08:23:14 CEST Local HEAD before operations: daacccfc194876a147e00b8ce7492b2ed296dfdc
