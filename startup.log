@@ -1105,3 +1105,27 @@ jeu. 18 sept. 2025 13:56:59 CEST Network available. Proceeding with git operatio
 Agent pid 743
 Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
 jeu. 18 sept. 2025 13:56:59 CEST Local HEAD before operations: b6dce073eabb4202095ce995b503a0b2e7ab5ea4
+[main 2fc2d29] Auto-commit: 2025-09-18 13:56:59
+ 1 file changed, 7 insertions(+)
+jeu. 18 sept. 2025 13:57:00 CEST Local changes committed.
+jeu. 18 sept. 2025 13:57:00 CEST Attempting git push origin main...
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+jeu. 18 sept. 2025 13:57:00 CEST git push failed or was rejected; continuing with fetch/reset.
+jeu. 18 sept. 2025 13:57:00 CEST Fetching origin/main...
+ssh: Could not resolve hostname github.com: Temporary failure in name resolution
+fatal : Impossible de lire le dépôt distant.
+
+Veuillez vérifier que vous avez les droits d'accès
+et que le dépôt existe.
+jeu. 18 sept. 2025 13:57:00 CEST Fetch may have failed (network/remote). Continuing anyway.
+jeu. 18 sept. 2025 13:57:00 CEST Remote origin/main: b6dce073eabb4202095ce995b503a0b2e7ab5ea4
+jeu. 18 sept. 2025 13:57:00 CEST No new remote commits compared to local HEAD before. Launching /home/linux/projet/affichage/Home.py
+=== projet startup jeu. 18 sept. 2025 13:57:05 CEST ===
+jeu. 18 sept. 2025 13:57:05 CEST Network available. Proceeding with git operations...
+Agent pid 982
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+jeu. 18 sept. 2025 13:57:05 CEST Local HEAD before operations: 2fc2d294c4da5c235bfbbb33e2e92f247769c9a7
