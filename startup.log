@@ -616,3 +616,8 @@ jeu. 18 sept. 2025 08:23:30 CEST Reset to origin/main successful.
 jeu. 18 sept. 2025 08:23:30 CEST Changes applied from remote. Rebooting system now...
 Call to Reboot failed: Interactive authentication required.
 jeu. 18 sept. 2025 08:23:30 CEST Reboot command failed or returned. Exiting.
+=== projet startup jeu. 18 sept. 2025 08:36:41 CEST ===
+jeu. 18 sept. 2025 08:36:42 CEST Network available. Proceeding with git operations...
+Agent pid 920
+Identity added: /home/linux/.ssh/id_ed25519 (linux@raspberrypi)
+jeu. 18 sept. 2025 08:36:43 CEST Local HEAD before operations: efc9386f7df7023aa541b857d45bc03f769c22ab
