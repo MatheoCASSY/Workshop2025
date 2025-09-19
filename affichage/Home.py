@@ -146,6 +146,13 @@ def draw_footer(text):
         t = t[:-3] + "..."
     draw.text((2, footer_y), t, font=font, fill=1)
 
+def draw_text_centered(line, y_offset=0):
+    """Affiche une seule ligne centrée horizontalement, et verticalement + y_offset (px)."""
+    w = draw.textlength(line, font=font)
+    x = max(0, (width - w) // 2)
+    y = max(0, (height // 2 - (font.getsize(line)[1] // 2)) + y_offset)
+    draw.text((x, y), line, font=font, fill=1)
+
 # ------------------------
 # Tamagotchi (lock screen sans stats affichées)
 # ------------------------
@@ -174,7 +181,7 @@ def animate_tamagotchi():
     draw_tamagotchi()
 
 # ------------------------
-# Menu principal
+# Menu principal (style Flipper Zero)
 # ------------------------
 def draw_menu():
     clear_screen()
@@ -288,27 +295,25 @@ def handler(ch, event):
     # bloquer les entrées pendant loading
     if mode == "loading": return
 
-    # ---- lock / écran de code de triche (sans afficher le mdp) ----
+    # ---- lock / écran de "Code de triche ?" (sans afficher le mdp) ----
     if mode in ("lock", "unlock_confirm"):
         if ch == 2:  # BACK -> passer à l'invite de code sans afficher la séquence
             mode = "loading"
             draw_loading_screen("Chargement...", seconds=0.6)
+
+            # Après la barre de chargement, écran VIDE avec uniquement "Code de triche ?" centré
             mode = "unlock_confirm"
             clear_screen()
-            # Nouveau texte demandé : "Code de triche ?"
-            draw.text((8, height//2 - 12), "Code de triche ?", font=font, fill=1)
-            # footer discret indiquant la manière d'entrer (sans montrer le mdp)
-            draw_footer("U/D pour saisir  BACK:Retour")
+            draw_text_centered("Code de triche ?")
+            # Aucune autre info à l'écran (pas de footer, pas de séquence affichée)
             lcd_display()
             sequence = []
             return
 
-        # interactions rapides sur lock: cliquetis, animation
+        # interactions rapides sur lock: cliquetis, animation, luminosité
         if ch == 4:
-            # simple interaction visuelle : cligne
             animate_tamagotchi(); return
         elif ch == 5:
-            # luminosité up depuis lock
             brightness = min(255, brightness+16)
             backlight.set_all(brightness, brightness, brightness); backlight.show(); draw_tamagotchi(); return
         elif ch == 3:
@@ -325,10 +330,9 @@ def handler(ch, event):
             if len(sequence) > 3:
                 sequence = sequence[-3:]
 
-            # feedback minimal : on réaffiche juste l'invite (pas de mdp)
+            # feedback: **toujours** l'écran vide avec "Code de triche ?"
             clear_screen()
-            draw.text((8, height//2 - 12), "Code de triche ?", font=font, fill=1)
-            draw_footer("U/D pour saisir  BACK:Retour")
+            draw_text_centered("Code de triche ?")
             lcd_display()
 
             # si la séquence est correcte -> ouvrir le menu
