@@ -129,7 +129,7 @@ if GFX:
     img = Image.new('1', (W,H)); draw = ImageDraw.Draw(img)
 
     def cleanup_and_launch_home():
-        # Retour **menu principal** depuis n'importe où
+        """Retour **menu principal** depuis n'importe où (et on quitte ce script)."""
         try:
             backlight.set_all(0,0,0); backlight.show()
             lcd.clear(); lcd.show()
@@ -376,5 +376,9 @@ if __name__ == "__main__":
         main_loop()
     except KeyboardInterrupt:
         if GFX:
-            try: backlight.set_all(0,0,0); backlight.show(); lcd.clear(); lcd.show()
-            except: pass
+            try:
+                backlight.set_all(0,0,0); backlight.show()
+                lcd.clear(); lcd.show()
+            except:
+                pass
+        sys.exit(0)
