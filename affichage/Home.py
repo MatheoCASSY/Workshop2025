@@ -132,7 +132,6 @@ def draw_bitmap_scaled(x_offset, y_offset, bitmap_rows, scale=1, invert=False):
             y0 = y_offset + ry*scale
             x1 = x0 + scale - 1
             y1 = y0 + scale - 1
-            # clamp drawing to screen bounds
             if x1 < 0 or y1 < 0 or x0 >= width or y0 >= height:
                 continue
             draw.rectangle((x0, y0, min(x1, width-1), min(y1, height-1)), fill=(0 if invert else 1))
@@ -147,10 +146,13 @@ def draw_footer(text):
     draw.text((2, footer_y), t, font=font, fill=1)
 
 def draw_text_centered(line, y_offset=0):
-    """Affiche une seule ligne centrée horizontalement, et verticalement + y_offset (px)."""
-    w = draw.textlength(line, font=font)
+    """Affiche une seule ligne centrée horizontalement, verticalement + y_offset."""
+    # Utilise textbbox pour être robuste (Pillow récent et font par défaut)
+    bbox = draw.textbbox((0,0), line, font=font)
+    w = bbox[2] - bbox[0]
+    h = bbox[3] - bbox[1]
     x = max(0, (width - w) // 2)
-    y = max(0, (height // 2 - (font.getsize(line)[1] // 2)) + y_offset)
+    y = max(0, (height - h) // 2 + y_offset)
     draw.text((x, y), line, font=font, fill=1)
 
 # ------------------------
@@ -160,8 +162,7 @@ def draw_tamagotchi():
     clear_screen()
     # Calcule la taille max pour centrer le sprite
     base = 16
-    # espace haut/bas pour footer
-    reserved = 10 + 10  # marge haute pour potentiel header + footer
+    reserved = 10 + 10  # marge haute/basse pour laisser respirer le footer
     scale_w = max(1, width // base)
     scale_h = max(1, (height - reserved) // base)
     scale = max(1, min(scale_w, scale_h))
@@ -171,8 +172,8 @@ def draw_tamagotchi():
     sx = (width - sprite_w) // 2
     sy = (height - sprite_h) // 2 - 4
     draw_bitmap_scaled(sx, sy, sprite, scale=scale)
-    # footer discret
-    draw_footer("BACK:Unlock  +/-:Lum")
+    # Footer demandé : BACK lance l'écran "Code de triche ?"
+    draw_footer("BACK: Code de triche  +/-:Lum")
     lcd_display()
 
 def animate_tamagotchi():
@@ -295,22 +296,21 @@ def handler(ch, event):
     # bloquer les entrées pendant loading
     if mode == "loading": return
 
-    # ---- lock / écran de "Code de triche ?" (sans afficher le mdp) ----
+    # ---- lock / écran "Code de triche ?" (sans afficher le mdp) ----
     if mode in ("lock", "unlock_confirm"):
-        if ch == 2:  # BACK -> passer à l'invite de code sans afficher la séquence
+        if ch == 2:  # BACK -> passer à l'invite de code
             mode = "loading"
             draw_loading_screen("Chargement...", seconds=0.6)
 
-            # Après la barre de chargement, écran VIDE avec uniquement "Code de triche ?" centré
+            # Écran VIDE avec uniquement "Code de triche ?" centré
             mode = "unlock_confirm"
             clear_screen()
             draw_text_centered("Code de triche ?")
-            # Aucune autre info à l'écran (pas de footer, pas de séquence affichée)
             lcd_display()
             sequence = []
             return
 
-        # interactions rapides sur lock: cliquetis, animation, luminosité
+        # interactions sur lock: animation/luminosité
         if ch == 4:
             animate_tamagotchi(); return
         elif ch == 5:
@@ -320,31 +320,32 @@ def handler(ch, event):
             brightness = max(0, brightness-16)
             backlight.set_all(brightness, brightness, brightness); backlight.show(); draw_tamagotchi(); return
 
-        # pendant la saisie du code : on **n'affiche jamais la séquence**
+        # saisie du code (jamais affichée)
         if mode == "unlock_confirm":
             if ch == 0:
                 sequence.append('U')
             elif ch == 1:
                 sequence.append('D')
-            # ne garder que les 3 derniers
             if len(sequence) > 3:
                 sequence = sequence[-3:]
 
-            # feedback: **toujours** l'écran vide avec "Code de triche ?"
+            # Toujours le même écran vide avec texte centré
             clear_screen()
             draw_text_centered("Code de triche ?")
             lcd_display()
 
-            # si la séquence est correcte -> ouvrir le menu
-            if len(sequence) == 3 and sequence == ['U','D','U']:
+            # Si code correct -> ouverture du menu (transition fiabilisée)
+            if sequence == ['U','D','U']:
                 mode = "loading"
                 draw_loading_screen("Ouverture...", seconds=0.8)
+                # on force l'affichage du menu juste après
                 mode = "menu"
                 sequence = []
                 draw_menu()
+                return
             return
 
-        # si on est resté en lock (autres touches), on réaffiche le tama
+        # sinon, on reste en lock
         if mode == "lock":
             draw_tamagotchi()
         return
@@ -405,7 +406,6 @@ try:
         if mode == "lock":
             animate_tamagotchi(); time.sleep(0.5)
         elif mode == "menu":
-            # menu redessiné par handler quand nécessaire
             time.sleep(0.2)
         elif mode == "output":
             time.sleep(0.2)
