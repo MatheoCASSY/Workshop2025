@@ -40,11 +40,11 @@ ICONS = {
 }
 
 # ------------------------
-# États
+# États / variables
 # ------------------------
 current_index = 0
 mode = "lock"     # lock / unlock_confirm / menu / output / loading
-sequence = []
+sequence = []     # pour U-D-U
 output_lines = []
 output_offset = 0
 OUTPUT_LINES_PER_PAGE = 5
@@ -68,7 +68,7 @@ mascotte_IDLE_2 = [
 ]
 
 # ------------------------
-# Utils
+# Utils dessin / cleanup
 # ------------------------
 def cleanup():
     try:
@@ -78,57 +78,58 @@ def cleanup():
 atexit.register(cleanup)
 
 def clear_screen():
-    # Efface le buffer PIL
     draw.rectangle((0,0,width,height), fill=0)
 
 def draw_image_to_lcd():
     pix = image.load()
     for y in range(height):
         for x in range(width):
-            lcd.set_pixel(x,y,1 if pix[x,y] else 0)
+            lcd.set_pixel(x,y, 1 if pix[x,y] else 0)
     lcd.show()
 
 def draw_bitmap_scaled(x,y,bitmap,scale=1):
     for ry,row in enumerate(bitmap):
         for rx,ch in enumerate(row):
-            if ch=="1":
-                draw.rectangle((x+rx*scale,y+ry*scale,x+(rx+1)*scale-1,y+(ry+1)*scale-1), fill=1)
+            if ch == "1":
+                draw.rectangle((x+rx*scale, y+ry*scale, x+(rx+1)*scale-1, y+(ry+1)*scale-1), fill=1)
 
 def draw_icon_on_image(x_offset, y_offset, icon_rows, invert=False):
     for ry,row in enumerate(icon_rows):
         for rx,ch in enumerate(row):
-            if ch!="1": continue
-            px=x_offset+rx; py=y_offset+ry
-            if 0<=px<width and 0<=py<height:
-                draw.point((px,py), 0 if invert else 1)
+            if ch != "1": continue
+            px = x_offset + rx; py = y_offset + ry
+            if 0 <= px < width and 0 <= py < height:
+                draw.point((px, py), 0 if invert else 1)
 
-def draw_footer(txt):
-    # tronque si trop long
+def draw_footer(text):
+    footer_y = height - 9
     max_w = width - 4
-    t = txt
+    t = text
     while draw.textlength(t, font=font) > max_w and len(t) > 3:
         t = t[:-4] + "..."
-    draw.text((2, height-9), t, font=font, fill=1)
+    draw.text((2, footer_y), t, font=font, fill=1)
 
 # ------------------------
-# Loading (efface aussi le LCD)
+# Loading (efface aussi le LCD matériel)
 # ------------------------
 def draw_loading_screen(title="Loading...", seconds=0.8):
-    # Efface complètement l'affichage précédent
     clear_screen()
-    lcd.clear(); lcd.show()
+    # ensure hardware cleared too so previous pixels don't persist
+    try:
+        lcd.clear(); lcd.show()
+    except: pass
 
-    steps=16
-    delay=max(0.01, seconds/steps)
+    steps = 16
+    delay = max(0.01, seconds / steps)
     draw.text((4,8), title, font=font, fill=1)
     bar_x, bar_y = 6, 30
-    bar_w, bar_h = width-12, 8
+    bar_w, bar_h = width - 12, 8
     for s in range(steps+1):
-        # re-clear la zone barre pour éviter traînées
+        # clear bar area to avoid artifacts
         draw.rectangle((bar_x-1,bar_y-1,bar_x+bar_w+1,bar_y+bar_h+1), outline=1, fill=0)
-        fill=int((s/steps)*bar_w)
-        if fill>0:
-            draw.rectangle((bar_x,bar_y,bar_x+fill,bar_y+bar_h), fill=1)
+        fill_w = int((s/steps) * bar_w)
+        if fill_w > 0:
+            draw.rectangle((bar_x,bar_y,bar_x+fill_w,bar_y+bar_h), fill=1)
         draw_image_to_lcd()
         time.sleep(delay)
 
@@ -138,9 +139,10 @@ def draw_loading_screen(title="Loading...", seconds=0.8):
 def draw_tamagotchi():
     clear_screen()
     sprite = mascotte_IDLE_1 if tama_eye_open else mascotte_IDLE_2
+    # calcul scale automatique mais ici on garde scale 3 par défaut pour lisibilité
     scale = 3
-    sx = (width-(16*scale))//2
-    sy = (height-(16*scale))//2 - 4
+    sx = (width - (16*scale)) // 2
+    sy = (height - (16*scale)) // 2 - 4
     draw_bitmap_scaled(sx, sy, sprite, scale)
     draw_footer("BACK: Code de triche  +/-:Lum")
     draw_image_to_lcd()
@@ -152,7 +154,6 @@ def animate_tamagotchi():
 
 def draw_unlock_prompt():
     clear_screen()
-    # Écran vide avec texte centré
     msg = "Code de triche ?"
     w = draw.textlength(msg, font=font)
     draw.text(((width - w)//2, height//2 - 5), msg, font=font, fill=1)
@@ -160,15 +161,13 @@ def draw_unlock_prompt():
 
 def draw_menu():
     clear_screen()
-    # Header inversé
     draw.rectangle((0,0,width,9), fill=1)
     draw.text((4,1), time.strftime("%H:%M"), font=font, fill=0)
     draw.text((width-36,1), f"L:{brightness}", font=font, fill=0)
 
-    # Liste
     entry_h = 12
     start_y = 14
-    for idx,(name,_) in enumerate(MENU_ITEMS):
+    for idx, (name, _) in enumerate(MENU_ITEMS):
         y = start_y + idx*entry_h
         invert = (idx == current_index)
         if invert:
@@ -177,7 +176,6 @@ def draw_menu():
         draw_icon_on_image(2, y, icon, invert=invert)
         draw.text((20, y), name, font=font, fill=(0 if invert else 1))
 
-    # (flèche supprimée pour éviter artefacts)
     draw_footer("BACK:Lock  OK:Lancer  +/-:Lum  U/D:Nav")
     draw_image_to_lcd()
 
@@ -186,14 +184,13 @@ def draw_output():
     draw.rectangle((0,0,width,9), fill=1)
     draw.text((4,1), time.strftime("%H:%M"), font=font, fill=0)
     draw.text((width-36,1), f"L:{brightness}", font=font, fill=0)
-
     top = 12
     for i in range(OUTPUT_LINES_PER_PAGE):
         idx = output_offset + i
-        if idx >= len(output_lines): break
+        if idx >= len(output_lines):
+            break
         draw.text((4, top + i*10), output_lines[idx], font=font, fill=1)
-
-    draw_footer("BACK:Menu  +/-:Lum  U/D:Scroll")
+    draw_footer("<BACK menu>  +/- Lum  U/D Scroll")
     draw_image_to_lcd()
 
 # ------------------------
@@ -208,68 +205,81 @@ def run_script_capture(path):
     except subprocess.TimeoutExpired:
         text = "Script timeout."
     except Exception as e:
-        text = "Error: " + str(e)
+        text = "Error running script: " + str(e)
 
     lines = []
+    max_chars = 20
     for line in text.splitlines():
-        for i in range(0, len(line), 20):
-            lines.append(line[i:i+20])
+        for i in range(0, len(line), max_chars):
+            lines.append(line[i:i+max_chars])
     if not lines:
         lines = ["<no output>"]
     return lines
 
 # ------------------------
-# Handler touches (0=Up,1=Down,2=Back,3=-,4=OK,5=+)
+# Touch handler (0=Up,1=Down,2=Back,3=-,4=OK,5=+)
 # ------------------------
 def handler(ch, event):
     global current_index, mode, output_offset, brightness, output_lines, sequence, tama_eye_open
     if event != "press":
         return
 
-    # ----- RÈGLE BACK GLOBALE -----
+    # ----- BACK behavior:
+    # - If we're in lock -> open unlock_confirm (code screen) (original behavior)
+    # - Else if in menu -> lock (verrouille)
+    # - Else -> go to menu (principal)
     if ch == 2:
-        # Si on est déjà sur le menu => verrouille
-        if mode == "menu":
+        if mode == "lock":
+            mode = "loading"
+            draw_loading_screen("Chargement...", seconds=0.8)
+            mode = "unlock_confirm"
+            sequence.clear()
+            draw_unlock_prompt()
+            return
+        elif mode == "menu":
             mode = "loading"
             draw_loading_screen("Verrouillage...", seconds=0.5)
             mode = "lock"
             draw_tamagotchi()
             return
-        # Sinon, retour menu principal
-        mode = "menu"
-        draw_menu()
-        return
+        else:
+            # from output or other screens -> return to menu
+            mode = "menu"
+            draw_menu()
+            return
 
-    # Bloque les inputs pendant "loading"
+    # Ignore presses during loading
     if mode == "loading":
         return
 
-    # ----- LOCK -----
+    # ----- LOCK interactions -----
     if mode == "lock":
-        if ch == 4:  # OK -> petit blink
+        if ch == 4:
             tama_eye_open = not tama_eye_open
             draw_tamagotchi(); return
-        elif ch == 5:  # Lum +
-            brightness = min(255, brightness+16)
-            backlight.set_all(brightness,brightness,brightness); backlight.show()
+        elif ch == 5:
+            brightness = min(255, brightness + 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
             draw_tamagotchi(); return
-        elif ch == 3:  # Lum -
-            brightness = max(0, brightness-16)
-            backlight.set_all(brightness,brightness,brightness); backlight.show()
+        elif ch == 3:
+            brightness = max(0, brightness - 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
             draw_tamagotchi(); return
-        # Up/Down ignorés
         return
 
-    # ----- UNLOCK (Code de triche) -----
+    # ----- UNLOCK_CONFIRM (code U-D-U) -----
     if mode == "unlock_confirm":
-        if ch == 0: sequence.append('U')
-        elif ch == 1: sequence.append('D')
-        if len(sequence) > 3: sequence[:] = sequence[-3:]
+        if ch == 0:
+            sequence.append('U')
+        elif ch == 1:
+            sequence.append('D')
+        if len(sequence) > 3:
+            sequence[:] = sequence[-3:]
 
-        # On ne visualise jamais la séquence : écran identique
+        # keep prompt identical (never display sequence)
         draw_unlock_prompt()
 
-        if sequence == ['U','D','U']:
+        if len(sequence) == 3 and sequence == ['U','D','U']:
             mode = "loading"
             draw_loading_screen("Ouverture...", seconds=0.8)
             mode = "menu"
@@ -277,49 +287,50 @@ def handler(ch, event):
             draw_menu()
         return
 
-    # ----- MENU -----
+    # ----- MENU interactions -----
     if mode == "menu":
-        if ch == 0:  # Up
+        if ch == 0:
             current_index = (current_index - 1) % len(MENU_ITEMS)
             draw_menu(); return
-        elif ch == 1:  # Down
+        elif ch == 1:
             current_index = (current_index + 1) % len(MENU_ITEMS)
             draw_menu(); return
-        elif ch == 4:  # OK -> exécute
+        elif ch == 4:
             name, path = MENU_ITEMS[current_index]
             mode = "loading"
             draw_loading_screen(f"Lancement: {name}", seconds=1.0)
-            output_lines = run_script_capture(path)
+            output_lines.clear()
+            output_lines.extend(run_script_capture(path))
             output_offset = 0
             mode = "output"
             draw_output()
             return
-        elif ch == 5:  # Lum +
-            brightness = min(255, brightness+16)
-            backlight.set_all(brightness,brightness,brightness); backlight.show()
+        elif ch == 5:
+            brightness = min(255, brightness + 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
             draw_menu(); return
-        elif ch == 3:  # Lum -
-            brightness = max(0, brightness-16)
-            backlight.set_all(brightness,brightness,brightness); backlight.show()
+        elif ch == 3:
+            brightness = max(0, brightness - 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
             draw_menu(); return
         return
 
-    # ----- OUTPUT -----
+    # ----- OUTPUT interactions -----
     if mode == "output":
-        if ch == 0:  # Up (scroll)
+        if ch == 0:
             output_offset = max(0, output_offset - 1)
             draw_output(); return
-        elif ch == 1:  # Down (scroll)
+        elif ch == 1:
             max_off = max(0, len(output_lines) - OUTPUT_LINES_PER_PAGE)
             output_offset = min(max_off, output_offset + 1)
             draw_output(); return
-        elif ch == 5:  # Lum +
-            brightness = min(255, brightness+16)
-            backlight.set_all(brightness,brightness,brightness); backlight.show()
+        elif ch == 5:
+            brightness = min(255, brightness + 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
             draw_output(); return
-        elif ch == 3:  # Lum -
-            brightness = max(0, brightness-16)
-            backlight.set_all(brightness,brightness,brightness); backlight.show()
+        elif ch == 3:
+            brightness = max(0, brightness - 16)
+            backlight.set_all(brightness, brightness, brightness); backlight.show()
             draw_output(); return
         return
 
@@ -331,28 +342,28 @@ for i in range(6):
     except: pass
     try: touch.on(i, handler)
     except: pass
-backlight.set_all(brightness,brightness,brightness)
+
+backlight.set_all(brightness, brightness, brightness)
 backlight.show()
 
 # ------------------------
 # Main loop
 # ------------------------
-# Démarre en lock (tamagotchi)
 draw_tamagotchi()
-
 try:
     while True:
         if mode == "lock":
             animate_tamagotchi(); time.sleep(0.5)
-        elif mode == "unlock_confirm":
-            time.sleep(0.2)
         elif mode == "menu":
             time.sleep(0.2)
         elif mode == "output":
+            time.sleep(0.2)
+        elif mode == "unlock_confirm":
             time.sleep(0.2)
         elif mode == "loading":
             time.sleep(0.1)
         else:
             time.sleep(0.2)
 except KeyboardInterrupt:
-    cleanup(); sys.exit(0)
+    cleanup()
+    sys.exit(0)
