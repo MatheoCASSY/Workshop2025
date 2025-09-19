@@ -129,12 +129,12 @@ if GFX:
     img = Image.new('1', (W,H)); draw = ImageDraw.Draw(img)
 
     def cleanup_and_launch_home():
+        # Retour **menu principal** depuis n'importe où
         try:
             backlight.set_all(0,0,0); backlight.show()
             lcd.clear(); lcd.show()
         except:
             pass
-        # try to launch Home.py and exit this script
         try:
             subprocess.Popen(["python3", HOME_SCRIPT])
         except Exception:
@@ -148,8 +148,11 @@ if GFX:
                 lcd.set_pixel(x,y, 1 if pix[x,y] else 0)
         lcd.show()
 
-    def draw_ip_entry():
+    def clear_screen():
         draw.rectangle((0,0,W,H), fill=0)
+
+    def draw_ip_entry():
+        clear_screen()
         # Header
         draw.rectangle((0,0,W,9), fill=1)
         draw.text((4,1), "Port Scan", font=font, fill=0)
@@ -157,72 +160,58 @@ if GFX:
         # Label
         draw.text((4,16), "IP:", font=font, fill=1)
 
-        # Compose IP display nicely and highlight current octet
+        # Compose IP display + highlight
         ip_text = ip_from_octets(octets)
         parts = ip_text.split(".")
-        # start x for ip (after label)
         x = 30
         for i,p in enumerate(parts):
-            w = draw.textsize(p, font=font)[0]
+            w, _ = draw.textsize(p, font=font)
             if i == cur_octet:
-                # draw an outlined rounded-ish rect as highlight (2px tall area)
                 draw.rectangle((x-2, 22, x + w + 2, 30), fill=1)
                 draw.text((x, 24), p, font=font, fill=0)
             else:
                 draw.text((x, 24), p, font=font, fill=1)
-            x += w + draw.textsize(".", font=font)[0] + 4
+            dot_w, _ = draw.textsize(".", font=font)
+            x += w + dot_w + 4
 
         # Footer
-        draw.text((4,H-9), "OK=start  BACK=LAN  +/- lum", font=font, fill=1)
+        draw.text((4,H-9), "OK=start  BACK=Menu  +/- lum", font=font, fill=1)
         show_image()
 
     def draw_status(msg):
-        draw.rectangle((0,0,W,H), fill=0)
+        clear_screen()
         draw.rectangle((0,0,W,9), fill=1)
         draw.text((4,1), "Port Scan", font=font, fill=0)
-        # keep message short and centered-ish
         draw.text((4,18), msg, font=font, fill=1)
         show_image()
 
     def split_lines_to_width(texts, max_w):
-        """split long strings into several lines that fit the display using font metrics"""
         out = []
         for t in texts:
-            # simple split by comma or space if too long
             if draw.textsize(t, font=font)[0] <= max_w:
                 out.append(t)
             else:
-                # split naive into chunks of characters until fits
                 cur = ""
                 for token in t.replace(",", ", ").split(" "):
-                    if cur:
-                        candidate = cur + " " + token
-                    else:
-                        candidate = token
+                    candidate = (cur + " " + token).strip()
                     if draw.textsize(candidate, font=font)[0] <= max_w:
                         cur = candidate
                     else:
-                        if cur:
-                            out.append(cur)
-                        # token might still be too long -> hard chop
-                        if draw.textsize(token, font=font)[0] <= max_w:
-                            cur = token
-                        else:
-                            # hard chop by characters
-                            tmp = token
-                            while draw.textsize(tmp, font=font)[0] > max_w and len(tmp) > 1:
-                                tmp = tmp[:-1]
-                            if tmp:
-                                out.append(tmp + "-")
-                            cur = token[len(tmp):]
+                        if cur: out.append(cur)
+                        tmp = token
+                        while draw.textsize(tmp, font=font)[0] > max_w and len(tmp) > 1:
+                            tmp = tmp[:-1]
+                        if tmp:
+                            out.append(tmp + ("-" if len(token) > len(tmp) else ""))
+                        cur = token[len(tmp):]
                 if cur:
                     out.append(cur)
         return out
 
-    def draw_lines(lines, offset=0):
-        draw.rectangle((0,0,W,H), fill=0)
+    def draw_lines(lines, offset=0, header="Results"):
+        clear_screen()
         draw.rectangle((0,0,W,9), fill=1)
-        draw.text((4,1), "Results", font=font, fill=0)
+        draw.text((4,1), header, font=font, fill=0)
 
         # preprocess lines to fit width
         max_w = W - 8
@@ -233,7 +222,7 @@ if GFX:
             if idx >= len(wrapped): break
             draw.text((4, top + i*10), wrapped[idx], font=font, fill=1)
 
-        draw.text((4,H-9), "<BACK menu  +/- lum", font=font, fill=1)
+        draw.text((4,H-9), "BACK=Menu  U/D=Scroll  +/- lum", font=font, fill=1)
         show_image()
 
     try:
@@ -249,57 +238,55 @@ if GFX:
         global cur_octet, mode, octets, brightness, output_offset, lan_hosts, selected_host, output_lines
         if event != "press": return
 
+        # --- règle globale BACK -> Home menu ---
+        if ch == 2:
+            cleanup_and_launch_home()
+            return
+
         # ip entry mode
         if mode == "ip_entry":
-            if ch == 0: 
+            if ch == 0:
                 octets[cur_octet] = min(255, octets[cur_octet]+1); draw_ip_entry()
-            elif ch == 1: 
+            elif ch == 1:
                 octets[cur_octet] = max(0, octets[cur_octet]-1); draw_ip_entry()
             elif ch == 4:
-                if cur_octet < 3: 
+                if cur_octet < 3:
                     cur_octet += 1; draw_ip_entry()
                 else:
                     mode = "scanning"
-            elif ch == 2:
-                # go to LAN quick option
-                mode = "lan_option"; draw_status("LAN scan: OK to start")
             elif ch == 5:
-                brightness = min(255, brightness+16); backlight.set_all(brightness,brightness,brightness); backlight.show(); draw_ip_entry()
+                brightness = min(255, brightness+16)
+                backlight.set_all(brightness,brightness,brightness); backlight.show(); draw_ip_entry()
             elif ch == 3:
-                brightness = max(0, brightness-16); backlight.set_all(brightness,brightness,brightness); backlight.show(); draw_ip_entry()
+                brightness = max(0, brightness-16)
+                backlight.set_all(brightness,brightness,brightness); backlight.show(); draw_ip_entry()
 
         elif mode == "lan_option":
+            # (option LAN conservée mais BACK renvoie au menu principal)
             if ch == 4:
                 mode = "scanning"
-            elif ch == 2:
-                mode = "ip_entry"; draw_ip_entry()
 
         elif mode == "results":
             if ch == 0:
                 output_offset = max(0, output_offset-1); draw_lines(output_lines, output_offset)
             elif ch == 1:
-                output_offset = min(max(0, len(output_lines)-OUTPUT_LINES_PER_PAGE), output_offset+1); draw_lines(output_lines, output_offset)
-            elif ch == 2:
-                # BACK -> return to Home menu (launch Home.py)
-                cleanup_and_launch_home()
+                max_off = max(0, len(output_lines)-OUTPUT_LINES_PER_PAGE)
+                output_offset = min(max_off, output_offset+1); draw_lines(output_lines, output_offset)
+            # BACK déjà géré globalement
 
         elif mode == "host_select":
             if not lan_hosts:
-                # should not happen, but return to ip_entry
                 mode = "ip_entry"; draw_ip_entry(); return
             if ch == 0:
-                selected_host = max(0, selected_host-1); draw_lines(["Hosts:"]+lan_hosts, selected_host)
+                selected_host = max(0, selected_host-1); draw_lines(["Hosts:"]+lan_hosts, selected_host, header="Hosts")
             elif ch == 1:
-                selected_host = min(len(lan_hosts)-1, selected_host+1); draw_lines(["Hosts:"]+lan_hosts, selected_host)
+                selected_host = min(len(lan_hosts)-1, selected_host+1); draw_lines(["Hosts:"]+lan_hosts, selected_host, header="Hosts")
             elif ch == 4:
                 tgt = lan_hosts[selected_host]
                 parts = tgt.split(".")
-                for i in range(4):
-                    octets[i] = int(parts[i])
+                for i in range(4): octets[i] = int(parts[i])
                 mode = "scanning"
-            elif ch == 2:
-                # BACK -> return to Home menu
-                cleanup_and_launch_home()
+            # BACK déjà géré globalement
 
     for i in range(6):
         try: touch.on(i, touch_handler)
@@ -317,10 +304,8 @@ def console_mode():
         ip = input(f"IP [{ip_from_octets(octets)}]: ").strip() or ip_from_octets(octets)
         print("Scanning", ip)
         ports = scan_ports(ip)
-        if ports:
-            print("Open ports:", ports)
-        else:
-            print("No open ports.")
+        if ports: print("Open ports:", ports)
+        else: print("No open ports.")
     else:
         hosts, local = scan_lan_quick()
         print("Local IP:", local)
@@ -344,43 +329,28 @@ def main_loop():
     while True:
         if mode == "ip_entry":
             time.sleep(0.1)
+
         elif mode == "lan_option":
+            draw_status("LAN scan: OK to start")
             time.sleep(0.1)
+
         elif mode == "scanning":
             target = ip_from_octets(octets)
             draw_status("Scan " + target)
-            # if lan_option selected, do lan quick scan
-            if mode == "scanning" and 'LAN' in target:
-                pass
+
+            # Do scan
             ports = scan_ports(target)
+
             if ports:
-                # group ports into chunks that will render nicely (no huge long lines)
                 grouped = [", ".join(map(str, ports[i:i+8])) for i in range(0, len(ports), 8)]
-                # prepend header
                 lines = ["Open ports on " + target + ":"]
                 lines.extend(grouped)
-                # ensure each line fits using wrap helper
-                max_w = W - 8
-                output_lines = []
-                for l in lines:
-                    # if line too long, break it by commas into smaller pieces
-                    if draw.textsize(l, font=font)[0] <= max_w:
-                        output_lines.append(l)
-                    else:
-                        parts = l.split(", ")
-                        buf = ""
-                        for p in parts:
-                            cand = (buf + ", " + p) if buf else p
-                            if draw.textsize(cand, font=font)[0] <= max_w:
-                                buf = cand
-                            else:
-                                if buf: output_lines.append(buf)
-                                buf = p
-                        if buf: output_lines.append(buf)
             else:
-                output_lines = ["No open ports on " + target]
+                lines = ["No open ports on " + target]
+
+            output_lines = lines
             mode = "results"; output_offset = 0
-            draw_lines(output_lines, 0)
+            draw_lines(output_lines, 0, header="Results")
 
         elif mode == "host_select":
             if not lan_hosts:
@@ -388,9 +358,11 @@ def main_loop():
                 hosts, _ = scan_lan_quick()
                 lan_hosts = hosts
                 if not lan_hosts:
-                    output_lines = ["No hosts found on LAN"]; mode = "results"; draw_lines(output_lines,0); continue
-            draw_lines(["Hosts:"]+lan_hosts, 0)
+                    output_lines = ["No hosts found on LAN"]
+                    mode = "results"; draw_lines(output_lines,0, header="Results"); continue
+            draw_lines(["Hosts:"]+lan_hosts, 0, header="Hosts")
             time.sleep(0.1)
+
         elif mode == "results":
             time.sleep(0.1)
         else:

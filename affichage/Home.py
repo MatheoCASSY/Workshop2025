@@ -79,6 +79,9 @@ def cleanup():
     except: pass
 atexit.register(cleanup)
 
+def clear_screen():
+    draw.rectangle((0,0,width,height), fill=0)
+
 def draw_image_to_lcd():
     pix = image.load()
     for y in range(height):
@@ -103,8 +106,8 @@ def draw_text_centered(txt):
 # Loading screen
 # ------------------------
 def draw_loading_screen(title="Loading...",seconds=0.8):
+    clear_screen()
     steps=16; delay=seconds/steps
-    draw.rectangle((0,0,width,height),fill=0)
     draw.text((4,8),title,font=font,fill=1)
     bar_x,bar_y=6,30; bar_w=width-12; bar_h=8
     for s in range(steps+1):
@@ -117,7 +120,7 @@ def draw_loading_screen(title="Loading...",seconds=0.8):
 # Écran lock (Tamagotchi)
 # ------------------------
 def draw_tamagotchi():
-    draw.rectangle((0,0,width,height),fill=0)
+    clear_screen()
     sprite=mascotte_IDLE_1 if tama_eye_open else mascotte_IDLE_2
     scale=3
     sx=(width-(16*scale))//2; sy=(height-(16*scale))//2-4
@@ -131,7 +134,7 @@ def animate_tamagotchi():
     draw_tamagotchi()
 
 def draw_unlock_prompt():
-    draw.rectangle((0,0,width,height),fill=0)
+    clear_screen()
     draw_text_centered("Code de triche ?")
     draw_image_to_lcd()
 
@@ -139,7 +142,7 @@ def draw_unlock_prompt():
 # Menu style Flipper Zero
 # ------------------------
 def draw_menu():
-    draw.rectangle((0,0,width,height),fill=0)
+    clear_screen()
     draw.rectangle((0,0,width,9),fill=1)
     draw.text((4,1),time.strftime("%H:%M"),font=font,fill=0)
     draw.text((width-36,1),f"L:{brightness}",font=font,fill=0)
@@ -154,7 +157,6 @@ def draw_menu():
             for rx,ch in enumerate(row):
                 if ch=="1": draw.point((2+rx,y+ry),0 if invert else 1)
         draw.text((20,y),name,font=font,fill=0 if invert else 1)
-    draw.text((0,(height-font.getbbox('>')[3])//2),">",font=font,fill=1)
     draw_footer("BACK:Lock  OK:Lancer  +/-:Lum  U/D:Nav")
     draw_image_to_lcd()
 
@@ -162,7 +164,7 @@ def draw_menu():
 # Output screen
 # ------------------------
 def draw_output():
-    draw.rectangle((0,0,width,height),fill=0)
+    clear_screen()
     draw.rectangle((0,0,width,9),fill=1)
     draw.text((4,1),time.strftime("%H:%M"),font=font,fill=0)
     top=12
