@@ -75,7 +75,7 @@ projet/
 ### Démarrage
 1. Cloner le dépôt :
    ```bash
-   git clone <url_du_repo> ~/projet
+   git clone https://github.com/MatheoCASSY/Workshop2025 ~/projet
    ```
 2. Rendre le script de démarrage exécutable :
    ```bash
