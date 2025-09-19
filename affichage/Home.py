@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import time
 import sys
 import atexit
@@ -43,7 +46,6 @@ ICONS = {
 # États et variables UI / Tamagotchi
 # ------------------------
 current_index = 0
-trigger_action = False
 mode = "lock"            # lock / unlock_confirm / menu / output / loading
 sequence = []            # pour combinaison U-D-U (uniquement en unlock_confirm)
 output_lines = []
@@ -122,6 +124,9 @@ def draw_image_to_lcd():
             lcd.set_pixel(x, y, 1 if pix[x, y] else 0)
     lcd.show()
 
+def clear_screen():
+    draw.rectangle((0,0,width,height), fill=0)
+
 def draw_bitmap(x_offset, y_offset, bitmap_rows, invert=False):
     for ry, row in enumerate(bitmap_rows):
         for rx, ch in enumerate(row):
@@ -133,7 +138,6 @@ def draw_bitmap(x_offset, y_offset, bitmap_rows, invert=False):
                 draw.point((px, py), 0 if invert else 1)
 
 def draw_bitmap_scaled(x_offset, y_offset, bitmap_rows, scale=1, invert=False):
-    # Dessin nearest-neighbor (pixel-art), échelle entière
     if scale <= 1:
         draw_bitmap(x_offset, y_offset, bitmap_rows, invert=invert)
         return
@@ -160,21 +164,22 @@ def draw_icon_on_image(x_offset, y_offset, icon_rows, invert=False):
                 draw.point((px, py), 0 if invert else 1)
 
 def draw_footer(text):
-    # Affiche une ligne d’instructions en bas, tronquée si nécessaire
+    # Compact footer, always on single line at bottom
     footer_y = height - 9
     max_w = width - 4
     t = text
+    # truncate if too long
     while draw.textlength(t, font=font) > max_w and len(t) > 3:
-        t = t[:-4] + "..."
+        t = t[:-3] + "..."
     draw.text((2, footer_y), t, font=font, fill=1)
 
 # ------------------------
 # Loading screen + barre
 # ------------------------
 def draw_loading_screen(title="Loading...", seconds=1.2):
-    steps = 20
+    steps = 16
     delay = max(0.01, seconds / steps)
-    draw.rectangle((0,0,width,height), fill=0)
+    clear_screen()
     draw.text((4,8), title, font=font, fill=1)
     bar_x, bar_y = 6, 30
     bar_w, bar_h = width - 12, 8
@@ -191,40 +196,35 @@ def draw_loading_screen(title="Loading...", seconds=1.2):
 # Tamagotchi drawing / animation (lock screen)
 # ------------------------
 def draw_tamagotchi():
-    draw.rectangle((0,0,width,height), fill=0)
+    clear_screen()
 
-    # Ligne de stats (haut)
+    # Bandeau haut : stats
     top_text = f"H:{tama_hunger} P:{tama_happiness} C:{tama_cleanliness}"
-    draw.text((2,0), top_text, font=font, fill=1)
-    stats_h = 9  # bandeau texte haut
-    footer_h = 9 # bandeau texte bas
+    draw.rectangle((0,0,width,10), fill=1)
+    # texte inversé pour contraste
+    draw.text((4,1), top_text, font=font, fill=0)
 
-    # Zone disponible au centre pour le sprite
-    avail_h = height - (stats_h + footer_h)  # ex: 64 - 18 = 46 px
+    # Zone sprite calculée pour éviter chevauchement
+    stats_h = 10
+    footer_h = 8
+    avail_h = height - (stats_h + footer_h)
     base = 16
-    # Échelle entière max qui tient en hauteur ET largeur
     scale_h = max(1, avail_h // base)
     scale_w = max(1, (width) // base)
     scale = max(1, min(scale_h, scale_w))
-    # Évite de rogner les instructions si échelle trop grande
-    # (on garde 1 px de marge)
-    while (base*scale) > (avail_h):
+    while (base*scale) > (avail_h) and scale > 1:
         scale -= 1
-        if scale <= 1:
-            break
 
     sprite = mascotte_IDLE_1 if tama_eye_open else mascotte_IDLE_2
-
     sprite_w = base * scale
     sprite_h = base * scale
     sx = (width - sprite_w) // 2
     sy = stats_h + ((avail_h - sprite_h) // 2)
 
-    # Dessin du sprite à l’échelle
     draw_bitmap_scaled(sx, sy, sprite, scale=scale)
 
-    # Instructions (bas) – toujours visibles
-    draw_footer("+/- : Nourrir/Jouer")
+    # Footer minimal : commandes essentielles (très court)
+    draw_footer("OK:Interact  BACK:Unlock  +/-:Lum")
 
     draw_image_to_lcd()
 
@@ -237,39 +237,49 @@ def animate_tamagotchi():
 # Menu style Flipper Zero (affichage)
 # ------------------------
 def draw_menu():
-    draw.rectangle((0,0,width,height), fill=0)
+    clear_screen()
     # Header (inversé)
-    draw.rectangle((0,0,width,9), fill=1)
+    draw.rectangle((0,0,width,10), fill=1)
     draw.text((4,1), time.strftime("%H:%M"), font=font, fill=0)
     draw.text((width-36,1), f"L:{brightness}", font=font, fill=0)
 
-    if not MENU_ITEMS:
-        msg1, msg2 = "Aucun programme", "installe"
-        w1 = draw.textlength(msg1, font=font)
-        w2 = draw.textlength(msg2, font=font)
-        draw.text(((width - w1)//2, (height//2)-12), msg1, font=font, fill=1)
-        draw.text(((width - w2)//2, (height//2)+2), msg2, font=font, fill=1)
-        draw.text((0,(height - font.getbbox(">")[3])//2), ">", font=font, fill=1)
-        draw_image_to_lcd()
-        return
+    # Layout menu safe: compute vertical list size then center it
+    entry_h = 12       # vertical spacing per item
+    list_h = len(MENU_ITEMS) * entry_h
+    # limit list_h to area between header and footer
+    max_area_h = height - 18
+    if list_h > max_area_h:
+        # when too many items, show top chunk (scrolling handled by current_index)
+        visible_count = max_area_h // entry_h
+        visible_count = max(1, visible_count)
+    else:
+        visible_count = len(MENU_ITEMS)
 
-    # Scrolling menu with icons and selection bar
-    start_y = (height // 2) - 4
-    offset_top = current_index * 12
-    for idx, (name, _) in enumerate(MENU_ITEMS):
-        y = (idx*12) + start_y - offset_top
+    start_y = 10 + ((max_area_h - (visible_count * entry_h)) // 2)
+
+    # determine first visible index so selection is always visible
+    first_visible = max(0, min(current_index - visible_count//2, len(MENU_ITEMS)-visible_count))
+    for v in range(visible_count):
+        idx = first_visible + v
+        if idx >= len(MENU_ITEMS):
+            break
+        name, _ = MENU_ITEMS[idx]
+        y = start_y + (v * entry_h)
         icon = ICONS.get(name, ["00000"]*8)
         invert = (idx == current_index)
         if invert:
-            draw.rectangle(((20-4, y-1), (width, y+10)), fill=1)
+            # selection bar background
+            draw.rectangle((18, y-1, width-2, y+10), fill=1)
         draw_icon_on_image(2, y, icon, invert=invert)
-        draw.text((20, y), name, font=font, fill=0 if invert else 1)
+        # text color opposite if inverted
+        draw.text((20, y), name, font=font, fill=(0 if invert else 1))
 
-    # Simple left cursor
-    draw.text((0,(height - font.getbbox(">")[3])//2), ">", font=font, fill=1)
+    # left cursor
+    cursor_y = start_y + ((current_index - first_visible) * entry_h)
+    draw.text((0, cursor_y), ">", font=font, fill=1)
 
-    # Footer court pour cohérence UI
-    draw_footer("BACK:Lock  OK:Lancer  +/-:Lum  U/D:Nav")
+    # footer short
+    draw_footer("BACK:Lock  OK:Launch  +/-:Lum")
 
     draw_image_to_lcd()
 
@@ -277,8 +287,8 @@ def draw_menu():
 # Output display (after running a script)
 # ------------------------
 def draw_output():
-    draw.rectangle((0,0,width,height), fill=0)
-    draw.rectangle((0,0,width,9), fill=1)
+    clear_screen()
+    draw.rectangle((0,0,width,10), fill=1)
     draw.text((4,1), time.strftime("%H:%M"), font=font, fill=0)
     draw.text((width-36,1), f"L:{brightness}", font=font, fill=0)
     top = 12
@@ -305,8 +315,8 @@ def run_script_capture(path):
         text = "Error running script: " + str(e)
 
     lines = []
+    max_chars = 20
     for line in text.splitlines():
-        max_chars = 20
         for i in range(0, len(line), max_chars):
             lines.append(line[i:i+max_chars])
     if not lines:
@@ -317,7 +327,7 @@ def run_script_capture(path):
 # Touch handler (0=Up,1=Down,2=Back,3=-,4=OK,5=+)
 # ------------------------
 def handler(ch, event):
-    global current_index, trigger_action, mode, output_offset, brightness, output_lines
+    global current_index, mode, output_offset, brightness, output_lines
     global tama_hunger, tama_happiness, tama_cleanliness, sequence
 
     if event != "press":
@@ -359,9 +369,9 @@ def handler(ch, event):
     if mode in ("lock", "unlock_confirm"):
         if ch == 2:  # BACK -> écran de confirmation + reset séquence
             mode = "loading"
-            draw_loading_screen("Chargement...", seconds=1.0)
+            draw_loading_screen("Chargement...", seconds=0.8)
             mode = "unlock_confirm"
-            draw.rectangle((0,0,width,height), fill=0)
+            clear_screen()
             draw.text((8, height//2-12), "Déverrouillez l'appareil ?", font=font, fill=1)
             draw.text((8, height//2+2),  "Seq: Haut - Bas - Haut", font=font, fill=1)
             draw_footer("U/D pour saisir  BACK:Retour")
@@ -389,11 +399,9 @@ def handler(ch, event):
             if len(sequence) > 3:
                 sequence = sequence[-3:]
 
-            # Feedback + footer toujours visible
-            draw.rectangle((0,0,width,height), fill=0)
+            # Feedback minimal
+            clear_screen()
             draw.text((8, height//2-12), "Déverrouillez l'appareil ?", font=font, fill=1)
-            #draw.text((8, height//2+2),  "Seq: Haut - Bas - Haut", font=font, fill=1) | le mdp c'est secret xD
-            #draw.text((8, height//2+14), f"Entrée: {''.join(sequence)}", font=font, fill=1) | pour pas afficher les touches appuyées
             draw_footer("U/D pour saisir  BACK:Retour")
             draw_image_to_lcd()
 
@@ -429,7 +437,7 @@ def handler(ch, event):
                 cleanup()
                 sys.exit(0)
             mode = "loading"
-            draw_loading_screen(f"Lancement: {name}", seconds=1.2)
+            draw_loading_screen(f"Lancement: {name}", seconds=1.0)
             output_lines.clear()
             output_lines.extend(run_script_capture(path))
             output_offset = 0
@@ -438,7 +446,7 @@ def handler(ch, event):
             return
         elif ch == 2:  # BACK -> reverrouiller
             mode = "loading"
-            draw_loading_screen("Verrouillage...", seconds=0.6)
+            draw_loading_screen("Verrouillage...", seconds=0.5)
             mode = "lock"
             draw_tamagotchi()
             return
